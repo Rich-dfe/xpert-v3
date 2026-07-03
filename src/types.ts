@@ -38,17 +38,6 @@ export interface RegisterLoggerFormProps {
   onCustomerSelect: (customerId: string) => void;
 }
 
-interface DropdownOption{
-    value: string;
-    label: string;
-}
-
-export interface DropdownProps extends ComponentPropsWithoutRef<"select"> {
-  label: string;
-  options: DropdownOption[];
-  error?: string;
-}
-
 export interface LoggerListProps {
   customerId: string;
   listTitle: string;
@@ -69,4 +58,16 @@ export interface FormRadioGroupProps<TFieldValues extends FieldValues> {
     control: Control<TFieldValues>;
     label?: String;
     options: RadioOptions[]
+}
+
+interface DropdownOption{
+    value: string;
+    label: string;
+}
+
+export interface DropdownProps extends ComponentPropsWithoutRef<"select"> {
+  label: string;
+  options: DropdownOption[];
+  placeholder?: string;
+  error?: string;
 }
