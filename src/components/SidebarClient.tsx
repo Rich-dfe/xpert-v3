@@ -22,6 +22,7 @@ import { Customer } from "@/types/customer";
 import { useState } from "react";
 import { useUsersByCustomer } from "@/hooks/useUser";
 import { useListGroupsByUser } from "@/hooks/useGroup";
+import { useListLoggersByUser, useListLoggersByGroup } from "@/hooks/useLogger";
 
 
 //Menu items
@@ -53,28 +54,6 @@ const items = [
   },
 ];
 
-const groupOptions = [
-{
-  value: "1",
-  label: "Paddock1",
-},
-{
-  value: "2",
-  label: "Paddock2",
-}
-];
-
-const loggerOptions = [
-{
-  value: "1",
-  label: "PAR - ABCD123456",
-},
-{
-  value: "2",
-  label: "Water Level 2 ",
-}
-];
-
 //------------------------------------------------------
 
 interface SidebarClientProps {
@@ -88,7 +67,10 @@ const SidebarClient = ({user, customers}: SidebarClientProps) => {
 const [customerId, setCustomerId] = useState("");
 const [userId, setUserId] = useState("");
 const [groupId, setGroupId] = useState("");
+const [loggerId, setLoggerId] = useState("");
 
+
+// ------------- SELECT HANDLERS ---------------------
 const handleCustomerChange = (
   e: React.ChangeEvent<HTMLSelectElement>
 ) => {
@@ -107,25 +89,75 @@ const handleGroupChange = (
   setGroupId(e.target.value);
 };
 
+const handleLoggerChange = (
+  e: React.ChangeEvent<HTMLSelectElement>
+) => {
+  setLoggerId(e.target.value);
+};
+
+//------------------------------------------------------
+
   const customerOptions = customers.map((customer:any) => ({
   value: customer.id,
   label: customer.companyName,
 }));
 
+// ------ Fetch 'User data based on the selected customer -----------------
 const { data: users = [], isLoading: isUsersLoading, isError: isUsersError, error: usersError} = useUsersByCustomer(customerId);
 //Map user data for select menu attributes
 const userOptions = users.map((user:any) => ({
   value: user.id,
   label: user.name,
 }));
+// -------------------------------------------------------------------------
 
+// --------- Fetch 'Group' data based on the selected user -----------------
 const { data: groups = [], isLoading: isGroupsLoading, isError: isGroupsError, error: groupsError} = useListGroupsByUser(userId);
 
+//Add this option to the 'Groups' select menu to give the user an option to view all their loggers without filtering by group.
+const allGroup = {
+  id: -1,
+  userId: 0,
+  groupName: "Show all loggers",
+  notes: "A group of all loggers"
+};
+
+const updatedGroups = [allGroup,...groups,];
+
 //Map user data for select menu attributes
-const groupOptions = groups.map((group:any) => ({
+const groupOptions = updatedGroups.map((group:any) => ({
   value: group.id,
   label: group.groupName,
 }));
+
+// -------------------------------------------------------------------------
+
+// --------- Fetch 'Logger' data based on the selected user -----------------
+
+//If the group id >= 0 fetch the loggers belonging to the selected group.
+//else fetch all loggers belonging to the selected user 
+
+//If a group is selected: isGroup = true. 
+const isGroup = Number(groupId) >= 0;
+
+const { data: groupData, isLoading: isGroupLoading } = useListLoggersByGroup(groupId, { enabled: isGroup });
+const { data: userData, isLoading: isUserLoading } = useListLoggersByUser(userId, { enabled: !isGroup });
+
+// Determine the unified loading state based on which query is active
+const isLoggersLoading = isGroup ? isGroupLoading : isUserLoading;
+
+// 3. Map the data directly out of whichever query is active
+const loggerOptions = isGroup
+  ? ((groupData || []) as any[]).map((logger: any) => ({
+      value: logger.id,
+      label: logger.loggerName,
+    }))
+  : ((userData || []) as any[]).map((logger: any) => ({
+      value: logger.id,
+      label: logger.loggerName, // Map user data for select menu attributes here
+    }));
+
+
 
   return (
     <Sidebar collapsible="icon" className="border-r border-green-500">
@@ -142,7 +174,7 @@ const groupOptions = groups.map((group:any) => ({
               <span>Dataflow Systems Ltd</span>
             </Link>
           </SidebarMenuButton>
-          {isSuper(user) && <span>super-user -{customerId} - {userId} - {groupId}</span>}
+          {isSuper(user) && <span>super-user -{customerId} - {userId} - {groupId} - {loggerId}</span>}
         </SidebarMenu>
       </SidebarHeader>
 
@@ -150,7 +182,7 @@ const groupOptions = groups.map((group:any) => ({
       <DropdownBox label="Customers" options={customerOptions} onChange={handleCustomerChange} placeholder="Select Customer"/>
       <DropdownBox label={isUsersLoading ? "Loading" : "Users"} options={userOptions} onChange={handleUserChange} placeholder="Select User"/>
       <DropdownBox label={isGroupsLoading ? "Loading" : "Groups"} options={groupOptions} onChange={handleGroupChange} placeholder="Select Group"/>
-      <DropdownBox label="Loggers" options={loggerOptions} placeholder="Select Logger"/>
+      <DropdownBox label={isLoggersLoading ? "Loading" : "Loggers"} options={loggerOptions} onChange={handleLoggerChange} placeholder="Select Logger"/>
         
         <SidebarGroup />
         <SidebarGroupLabel>My Loggers</SidebarGroupLabel>
