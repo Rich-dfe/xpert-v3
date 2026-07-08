@@ -23,6 +23,7 @@ import { useState } from "react";
 import { useUsersByCustomer } from "@/hooks/useUser";
 import { useListGroupsByUser } from "@/hooks/useGroup";
 import { useListLoggersByUser, useListLoggersByGroup } from "@/hooks/useLogger";
+import { isSuperOrAdmin } from "@/lib/helpers";
 
 
 //Menu items
@@ -112,7 +113,11 @@ const userOptions = users.map((user:any) => ({
 // -------------------------------------------------------------------------
 
 // --------- Fetch 'Group' data based on the selected user -----------------
-const { data: groups = [], isLoading: isGroupsLoading, isError: isGroupsError, error: groupsError} = useListGroupsByUser(userId);
+
+//If the user has a normal 'user' role set the userId for the groups data to their auth id (user id from xpert RDS).
+//Else set it to the userId determioned by the 'Users' select menu which is only available to admin or super-user roles
+const effectiveUserId = isSuperOrAdmin(user) ? userId : user.id;
+const { data: groups = [], isLoading: isGroupsLoading, isError: isGroupsError, error: groupsError} = useListGroupsByUser(effectiveUserId);
 
 //Add this option to the 'Groups' select menu to give the user an option to view all their loggers without filtering by group.
 const allGroup = {
@@ -179,8 +184,9 @@ const loggerOptions = isGroup
       </SidebarHeader>
 
       <SidebarContent>
-      <DropdownBox label="Customers" options={customerOptions} onChange={handleCustomerChange} placeholder="Select Customer"/>
-      <DropdownBox label={isUsersLoading ? "Loading" : "Users"} options={userOptions} onChange={handleUserChange} placeholder="Select User"/>
+      {/* Only show the customers and users select menus if the user is an admin or super user */}
+      {isSuperOrAdmin(user) && <DropdownBox label="Customers" options={customerOptions} onChange={handleCustomerChange} placeholder="Select Customer"/>}
+      {isSuperOrAdmin(user) && <DropdownBox label={isUsersLoading ? "Loading" : "Users"} options={userOptions} onChange={handleUserChange} placeholder="Select User"/>}
       <DropdownBox label={isGroupsLoading ? "Loading" : "Groups"} options={groupOptions} onChange={handleGroupChange} placeholder="Select Group"/>
       <DropdownBox label={isLoggersLoading ? "Loading" : "Loggers"} options={loggerOptions} onChange={handleLoggerChange} placeholder="Select Logger"/>
         

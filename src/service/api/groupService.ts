@@ -11,6 +11,6 @@ export const groupService = {
         apiFetch<Group[]>("/groups"),
     
       listByUserId: (userId: string) =>
-        apiFetch<Group[]>(`/user/${userId}/groups/`),
+        apiFetch<Group[]>(`/users/${userId}/groups/`),
     }   
 }

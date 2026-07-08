@@ -12,3 +12,8 @@ export interface UsersByCustomer {
     customerId: number | null;
     email: string | null;
 }
+
+export interface UserId {
+  id: number,
+  name?: string 
+}

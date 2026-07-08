@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
+import { userService } from "./service/api/userService";
 
 // interface Session {
 //     user: {
@@ -29,11 +30,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, account, profile }) {
       if (profile) {
-        token.id = profile.sub;
+        //token.id = profile.sub;
         token.email = profile.email;
-        token.groups = profile["cognito:groups"] || [];
-        token.firstName = profile.given_name;
-        token.lastName = profile.family_name;
+        token.groups = (profile["cognito:groups"] as string[]) ?? [];
+        token.firstName = profile.given_name ?? undefined;
+        token.lastName = profile.family_name ?? undefined;
+
+        if (profile?.email) {
+          const dbUser = await userService.server.getUserId(profile.email);
+          token.id = dbUser.id.toString();
+        }
       }
 
       return token;
