@@ -29,6 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     async jwt({ token, account, profile }) {
+
       if (profile) {
         //token.id = profile.sub;
         token.email = profile.email;

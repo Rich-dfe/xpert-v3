@@ -7,11 +7,11 @@ export const userService = {
     getUserId: (email:string) => serverFetch<UserId>(`/users/email/${email}`)
   },
   client: {
-    list: () => apiFetch<UsersByCustomer[]>("/groups"),
+    //list: () => apiFetch<UsersByCustomer[]>("/groups"),
 
     listByCustomer: (custId: string) =>
-      apiFetch<UsersByCustomer[]>(`/customer/${custId}/users`),
+      apiFetch<UsersByCustomer[]>(`/customers/${custId}/users`),
 
-    getById: (id: number) => apiFetch<UsersByCustomer>(`/users/groups/${id}`),
+    //getById: (id: number) => apiFetch<UsersByCustomer>(`/users/groups/${id}`),
   },
 };

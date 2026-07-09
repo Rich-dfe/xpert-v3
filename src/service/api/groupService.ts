@@ -7,10 +7,15 @@ export const groupService = {
 
     },
     client:{
-      list: () =>
-        apiFetch<Group[]>("/groups"),
+      //list: () => apiFetch<Group[]>("/groups"),
     
-      listByUserId: (userId: string) =>
-        apiFetch<Group[]>(`/users/${userId}/groups/`),
-    }   
+    //   listByUserId: (userId: string) =>
+    //     apiFetch<Group[]>(`/users/${userId}/groups/`),
+    // }
+
+    listByUserId: (custId: string,userId: string) =>
+        apiFetch<Group[]>(`/users/groups?custId=${custId}&userId=${userId}`),
+    }
+    
+    ///loggers?groupId=${groupId}
 }

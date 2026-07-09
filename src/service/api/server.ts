@@ -10,7 +10,7 @@ export async function serverFetch<T>(
 
   // tidy this up later once we expose the access token properly
   const accessToken = (session as any)?.accessToken;
-  
+  //console.log("Access Token:", accessToken);
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
