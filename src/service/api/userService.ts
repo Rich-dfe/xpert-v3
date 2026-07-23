@@ -4,13 +4,13 @@ import { UsersByCustomer, UserId } from "@/types/user";
 
 export const userService = {
   server: {
-    getUserId: (email:string) => serverFetch<UserId>(`/users/email/${email}`)
+    getUserId: (email:string, idToken?:string) => serverFetch<UserId>(`/users/email/${email}`,{},idToken)
   },
   client: {
     //list: () => apiFetch<UsersByCustomer[]>("/groups"),
 
-    listByCustomer: (custId: string) =>
-      apiFetch<UsersByCustomer[]>(`/customers/${custId}/users`),
+    listUsersByCustomer: (custId: string, idToken?:string) =>
+      apiFetch<UsersByCustomer[]>(`/customers/${custId}/users`,{},idToken),
 
     //getById: (id: number) => apiFetch<UsersByCustomer>(`/users/groups/${id}`),
   },

@@ -8,7 +8,7 @@ export default async function Home() {
       <h1>Home</h1>
 
       {session ? (
-        <pre>{JSON.stringify(session, null, 2)}</pre>
+        <pre className="whitespace-pre-wrap break-all">{JSON.stringify(session, null, 2)}</pre>
       ) : (
         <form
           action={async () => {

@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import QueryProvider from "./QueryProvider";
 import { ThemeProvider } from "./ThemeProvider";
 import { SelectionProvider } from "@/context/SelectionContext";
+import { SessionProvider } from "next-auth/react";
 
 export function AppProviders({
   children,
@@ -9,6 +10,7 @@ export function AppProviders({
   children: ReactNode;
 }) {
   return (
+    <SessionProvider>
     <ThemeProvider
       attribute="class"
       defaultTheme="system"
@@ -21,5 +23,6 @@ export function AppProviders({
         </SelectionProvider>
       </QueryProvider>
     </ThemeProvider>
+    </SessionProvider>
   );
 }
