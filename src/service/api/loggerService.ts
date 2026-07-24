@@ -8,10 +8,11 @@ export const loggerService = {
 
     },
     client:{
-      listByGroupId: (groupId: string) =>
-        apiFetch<LoggerListSelect[]>(`/loggers?groupId=${groupId}`),
+      listByCustomerUserGroup: (custId:string, userId:string,groupId: string,idToken?:string) =>
+        apiFetch<LoggerListSelect[]>(`/customers/${custId}/users/${userId}/group/${groupId}/loggers`,{},idToken),
+        //apiFetch<LoggerListSelect[]>(`/loggers?groupId=${groupId}`),
     
-      listByUserId: (userId: string) =>
-        apiFetch<LoggerListSelect[]>(`/loggers?userId=${userId}`),
+      listByCustomerUser: (custId:string, userId:string,groupId: string,idToken?:string) =>
+        apiFetch<LoggerListSelect[]>(`/customers/${custId}/users/${userId}/group/${groupId}/loggers`,{},idToken),
     }   
 }

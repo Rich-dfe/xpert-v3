@@ -21,7 +21,7 @@ import { isSuper } from "@/lib/helpers";
 import { Customer } from "@/types/customer";
 import { useUsersByCustomer } from "@/hooks/useUser";
 import { useListGroupsByUser } from "@/hooks/useGroup";
-import { useListLoggersByUser, useListLoggersByGroup } from "@/hooks/useLogger";
+import { useListLoggersByCustomerUser, useListLoggersByCustomerUserGroup } from "@/hooks/useLogger";
 import { isSuperOrAdmin } from "@/lib/helpers";
 import { useSelection } from "@/context/SelectionContext";
 
@@ -150,8 +150,8 @@ const groupOptions = updatedGroups.map((group:any) => ({
 //If a group is selected: isGroup = true. 
 const isGroup = Number(selectedGroupId) >= 0;
 
-const { data: groupData, isLoading: isGroupLoading } = useListLoggersByGroup(selectedGroupId, { enabled: isGroup });
-const { data: userData, isLoading: isUserLoading } = useListLoggersByUser(selectedUserId, { enabled: !isGroup });
+const { data: groupData, isLoading: isGroupLoading } = useListLoggersByCustomerUserGroup(selectedCustomerId, selectedUserId,selectedGroupId, { enabled: isGroup });
+const { data: userData, isLoading: isUserLoading } = useListLoggersByCustomerUser(selectedCustomerId, selectedUserId,selectedGroupId, { enabled: !isGroup });
 
 // Determine the unified loading state based on which query is active
 const isLoggersLoading = isGroup ? isGroupLoading : isUserLoading;
