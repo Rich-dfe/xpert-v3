@@ -39,6 +39,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
 
           token.id = dbUser.id.toString();
+          token.customerId = dbUser.customerId.toString();
         }
 
         // if (profile?.email) {
@@ -56,6 +57,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.groups = token.groups;
       session.user.firstName = token.firstName;
       session.user.lastName = token.lastName;
+      session.user.customerId = token.customerId;
 
       //console.log("**** SESSION callback");
       //console.log("**** token.accessToken:", token.accessToken);

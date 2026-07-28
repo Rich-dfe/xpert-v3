@@ -35,6 +35,12 @@ export async function serverFetch<T>(
       }
     );
 
+  if (response.status === 401) {
+    // Session has expired
+    // Return something to display a message saying the session has expired. 
+    alert("Your session has expired. Please logout and sign in again.");
+  }
+
   if (!response.ok) {
     const message =
       await response.text();

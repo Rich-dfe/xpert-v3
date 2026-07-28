@@ -5,7 +5,7 @@ import { Customer } from "@/types/customer";
 export const customerService = {
   server: {
     list: () => serverFetch<Customer[]>("/customers"),
-    listByUser: (userId: string) => serverFetch<Customer[]>(`/users/customers/${userId}`),
+    listAdminCustomers: (userId: string) => serverFetch<Customer[]>(`/users/customers/${userId}`),
   },
   client: {
     getById: (id: number) => serverFetch<Customer>(`/customers/${id}`),

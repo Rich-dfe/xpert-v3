@@ -11,7 +11,6 @@ export const userService = {
 
     listUsersByCustomer: (custId: string, idToken?:string) =>
       apiFetch<UsersByCustomer[]>(`/customers/${custId}/users`,{},idToken),
-
     //getById: (id: number) => apiFetch<UsersByCustomer>(`/users/groups/${id}`),
   },
 };

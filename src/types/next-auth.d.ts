@@ -6,6 +6,8 @@ declare module "next-auth" {
     idToken?: string;
     user: DefaultSession["user"] & {
       id: string;
+      email: string | null | undefined;
+      customerId: string;
       groups: string[];
       firstName?: string;
       lastName?: string;
@@ -17,6 +19,8 @@ declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     idToken?: string;
     id: string;
+    email: string | null | undefined;
+    customerId: string;
     groups: string[];
     firstName?: string;
     lastName?: string;

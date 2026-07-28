@@ -1,8 +1,11 @@
 export interface CurrentUser {
   user: {
-    id?: string;
+    id: string;
     email?: string | null;
-    groups?: string[];
+    customerId: string;
+    groups: string[];
+    firstName?: string;
+    lastName?: string;
   };
 };
 
@@ -15,5 +18,6 @@ export interface UsersByCustomer {
 
 export interface UserId {
   id: number,
-  name?: string 
+  name?: string,
+  customerId: number 
 }

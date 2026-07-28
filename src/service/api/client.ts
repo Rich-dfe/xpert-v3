@@ -18,9 +18,17 @@ export async function apiFetch<T>(
     },
   });
 
+  if (response.status === 401) {
+    // Session has expired
+    // Return something to display a message saying the session has expired. 
+    alert("Your session has expired. Please logout and sign in again.");
+  }
+  
   if (!response.ok) {
     throw new Error(await response.text());
   }
 
-  return response.json();
+  const data = await response.json();
+
+  return data;
 }

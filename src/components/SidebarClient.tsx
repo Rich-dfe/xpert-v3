@@ -16,7 +16,7 @@ import {
 import { DropdownBox } from "./DropdownBox";
 import Image from "next/image";
 import Link from "next/link";
-import { CurrentUser } from "@/types/user";
+import type { Session } from "next-auth";
 import { isSuper } from "@/lib/helpers";
 import { Customer } from "@/types/customer";
 import { useUsersByCustomer } from "@/hooks/useUser";
@@ -58,7 +58,7 @@ const items = [
 //------------------------------------------------------
 
 interface SidebarClientProps {
-  user: CurrentUser["user"];
+  user: Session["user"];
   customers: Customer[];
 }
 
@@ -75,6 +75,16 @@ const {
   selectedLoggerId,
   setSelectedLoggerId,
 } = useSelection();
+
+const effectiveCustomerId = isSuperOrAdmin(user)
+  ? selectedCustomerId
+  : user.customerId;
+
+const effectiveUserId = isSuperOrAdmin(user)
+  ? selectedUserId
+  : user.id;
+
+  console.log("#########", effectiveCustomerId,effectiveUserId);
 
 // ------------- SELECT HANDLERS ---------------------
 const handleCustomerChange = (
@@ -109,9 +119,10 @@ const handleLoggerChange = (
 }));
 
 // ------ Fetch 'User data based on the selected customer -----------------
-const { data: users = [], isLoading: isUsersLoading, isError: isUsersError, error: usersError} = useUsersByCustomer(selectedCustomerId);
-//Map user data for select menu attributes
-const userOptions = users.map((user:any) => ({
+const { data: users = [], isLoading: isUsersLoading, isError: isUsersError, error: usersError} = useUsersByCustomer(effectiveCustomerId);
+//Check that users is an array and map user data for select menu attributes.
+//const userOptions = (Array.isArray(users) ? users : []).map((user: any) => ({
+const userOptions = users.map((user: any) => ({
   value: user.id,
   label: user.name,
 }));
@@ -121,8 +132,7 @@ const userOptions = users.map((user:any) => ({
 
 //If the user has a normal 'user' role set the userId for the groups data to their auth id (user id from xpert RDS).
 //Else set it to the userId determioned by the 'Users' select menu which is only available to admin or super-user roles
-const effectiveUserId = isSuperOrAdmin(user) ? selectedUserId : user.id;
-const { data: groups = [], isLoading: isGroupsLoading, isError: isGroupsError, error: groupsError} = useListGroupsByUser(selectedCustomerId,effectiveUserId);
+const { data: groups = [], isLoading: isGroupsLoading, isError: isGroupsError, error: groupsError} = useListGroupsByUser(effectiveCustomerId, effectiveUserId);
 
 //Add this option to the 'Groups' select menu to give the user an option to view all their loggers without filtering by group.
 const allGroup = {
@@ -132,14 +142,17 @@ const allGroup = {
   notes: "A group of all loggers"
 };
 
-const updatedGroups = [allGroup,...groups,];
+let updatedGroups = groups;
+if(groups.length > 0){
+  updatedGroups = [allGroup,...groups,];
+}
+
 
 //Map user data for select menu attributes
 const groupOptions = updatedGroups.map((group:any) => ({
   value: group.id,
   label: group.groupName,
 }));
-
 // -------------------------------------------------------------------------
 
 // --------- Fetch 'Logger' data based on the selected user -----------------
@@ -150,8 +163,8 @@ const groupOptions = updatedGroups.map((group:any) => ({
 //If a group is selected: isGroup = true. 
 const isGroup = Number(selectedGroupId) >= 0;
 
-const { data: groupData, isLoading: isGroupLoading } = useListLoggersByCustomerUserGroup(selectedCustomerId, selectedUserId,selectedGroupId, { enabled: isGroup });
-const { data: userData, isLoading: isUserLoading } = useListLoggersByCustomerUser(selectedCustomerId, selectedUserId,selectedGroupId, { enabled: !isGroup });
+const { data: groupData, isLoading: isGroupLoading } = useListLoggersByCustomerUserGroup(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: isGroup });
+const { data: userData, isLoading: isUserLoading } = useListLoggersByCustomerUser(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: !isGroup });
 
 // Determine the unified loading state based on which query is active
 const isLoggersLoading = isGroup ? isGroupLoading : isUserLoading;
