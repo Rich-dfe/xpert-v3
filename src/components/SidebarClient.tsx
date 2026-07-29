@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Home, Inbox } from "lucide-react";
+import { Settings, Home, ChartSpline, UserRoundArrowLeft, HatGlasses, HardDriveDownload, CircleQuestionMark, FileOutput, ShieldCog, Blend } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,35 +23,60 @@ import { useUsersByCustomer } from "@/hooks/useUser";
 import { useListGroupsByUser } from "@/hooks/useGroup";
 import { useListLoggersByCustomerUser, useListLoggersByCustomerUserGroup } from "@/hooks/useLogger";
 import { isSuperOrAdmin } from "@/lib/helpers";
-import { useSelection } from "@/context/SelectionContext";
-
+import { useApplicationContext } from "@/context/ApplicationContext";
+import SessionMonitor from "./SessionMonitor";
 
 //Menu items
 const items = [
   {
     title: "Home",
-    url: "/",
+    url: "/dashboard",
     icon: Home,
   },
   {
     title: "Config",
-    url: "#",
-    icon: Inbox,
+    url: "/dashboard/loggers/settings/config",
+    icon: Settings,
+  },
+  {
+    title: "Charts",
+    url: "/dashboard/loggers/data/charts",
+    icon: ChartSpline,
   },
   {
     title: "Reports",
-    url: "/",
-    icon: Settings,
+    url: "/dashboard/loggers/data/reports",
+    icon: FileOutput,
+  },
+  {
+    title: "Groups",
+    url: "/dashboard/loggers/manage/groups",
+    icon: Blend,
   },
   {
     title: "Licenses",
-    url: "/",
-    icon: Settings,
+    url: "/dashboard/loggers/manage/licenses",
+    icon: ShieldCog,
+  },
+  {
+    title: "Audit",
+    url: "/dashboard/loggers/data/audit",
+    icon: HatGlasses,
   },
   {
     title: "Help",
-    url: "/",
-    icon: Settings,
+    url: "/dashboard/loggers/admin/help",
+    icon: CircleQuestionMark,
+  },
+  {
+    title: "Accounts",
+    url: "/dashboard/loggers/manage/accounts",
+    icon: UserRoundArrowLeft,
+  },
+  {
+    title: "Server Settings",
+    url: "/dashboard/loggers/settings/server",
+    icon: HardDriveDownload,
   },
 ];
 
@@ -74,7 +99,7 @@ const {
   setSelectedGroupId,
   selectedLoggerId,
   setSelectedLoggerId,
-} = useSelection();
+} = useApplicationContext();
 
 const effectiveCustomerId = isSuperOrAdmin(user)
   ? selectedCustomerId
@@ -83,8 +108,6 @@ const effectiveCustomerId = isSuperOrAdmin(user)
 const effectiveUserId = isSuperOrAdmin(user)
   ? selectedUserId
   : user.id;
-
-  console.log("#########", effectiveCustomerId,effectiveUserId);
 
 // ------------- SELECT HANDLERS ---------------------
 const handleCustomerChange = (
@@ -119,7 +142,7 @@ const handleLoggerChange = (
 }));
 
 // ------ Fetch 'User data based on the selected customer -----------------
-const { data: users = [], isLoading: isUsersLoading, isError: isUsersError, error: usersError} = useUsersByCustomer(effectiveCustomerId);
+const { data: users = [], isLoading: isUsersLoading, isError: isUsersError, error: usersError} = useUsersByCustomer(effectiveCustomerId, isSuperOrAdmin(user));
 //Check that users is an array and map user data for select menu attributes.
 //const userOptions = (Array.isArray(users) ? users : []).map((user: any) => ({
 const userOptions = users.map((user: any) => ({
@@ -197,6 +220,7 @@ const loggerOptions = isGroup
               <span>Dataflow Systems Ltd</span>
             </Link>
           </SidebarMenuButton>
+          <SessionMonitor />
           {isSuper(user) && <span>super-user -{selectedCustomerId} - {selectedUserId} - {selectedGroupId} - {selectedLoggerId}</span>}
         </SidebarMenu>
       </SidebarHeader>
@@ -215,10 +239,10 @@ const loggerOptions = isGroup
             {items.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
-                  <a href={item.url}>
+                  <Link href={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}

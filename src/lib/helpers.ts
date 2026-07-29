@@ -13,7 +13,7 @@ export function isUser(user: { groups?: string[] }) {
 }
 
 export function isSuperOrAdmin(user?: { groups?: string[] }) {
-  return user?.groups?.includes("super-user") || user?.groups?.includes("admin");
+  return (user?.groups?.includes("super-user") === true || user?.groups?.includes("admin") === true);
 }
 
 // -------------------------------------------------------

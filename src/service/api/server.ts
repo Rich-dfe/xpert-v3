@@ -35,6 +35,8 @@ export async function serverFetch<T>(
       }
     );
 
+  //console.log("#### RESPONSE", response);
+
   if (response.status === 401) {
     // Session has expired
     // Return something to display a message saying the session has expired. 

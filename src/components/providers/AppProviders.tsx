@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import QueryProvider from "./QueryProvider";
 import { ThemeProvider } from "./ThemeProvider";
-import { SelectionProvider } from "@/context/SelectionContext";
+import { ApplicationContextProvider } from "@/context/ApplicationContext";
 import { SessionProvider } from "next-auth/react";
 
 export function AppProviders({
@@ -18,9 +18,9 @@ export function AppProviders({
       disableTransitionOnChange
     >
       <QueryProvider>
-        <SelectionProvider>
+        <ApplicationContextProvider>
           {children}
-        </SelectionProvider>
+        </ApplicationContextProvider>
       </QueryProvider>
     </ThemeProvider>
     </SessionProvider>

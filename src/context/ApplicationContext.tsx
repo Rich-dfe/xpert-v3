@@ -2,7 +2,7 @@
 
 import { createContext,useState,ReactNode, useContext } from "react"
 
-export interface SelectionContextType {
+export interface ApplicationContextType {
   selectedCustomerId: string;
   setSelectedCustomerId: (id: string) => void;
 
@@ -16,10 +16,10 @@ export interface SelectionContextType {
   setSelectedLoggerId: (id: string) => void;
 }
 
-export const SelectionContext =
-  createContext<SelectionContextType | undefined>(undefined);
+export const ApplicationContext =
+  createContext<ApplicationContextType | undefined>(undefined);
 
-  export function SelectionProvider({
+  export function ApplicationContextProvider({
   children,
 }: {
   children: ReactNode;
@@ -30,7 +30,7 @@ export const SelectionContext =
   const [selectedLoggerId, setSelectedLoggerId] = useState("");
 
   return (
-    <SelectionContext.Provider
+    <ApplicationContext.Provider
       value={{
         selectedCustomerId,
         setSelectedCustomerId,
@@ -43,12 +43,12 @@ export const SelectionContext =
       }}
     >
       {children}
-    </SelectionContext.Provider>
+    </ApplicationContext.Provider>
   );
 }
 
-export function useSelection() {
-  const context = useContext(SelectionContext);
+export function useApplicationContext() {
+  const context = useContext(ApplicationContext);
 
   if (!context) {
     throw new Error(
