@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { signOut } from "next-auth/react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
@@ -41,6 +42,7 @@ export async function serverFetch<T>(
     // Session has expired
     // Return something to display a message saying the session has expired. 
     alert("Your session has expired. Please logout and sign in again.");
+    signOut();
   }
 
   if (!response.ok) {
