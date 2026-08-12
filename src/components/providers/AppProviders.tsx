@@ -3,6 +3,7 @@ import QueryProvider from "./QueryProvider";
 import { ThemeProvider } from "./ThemeProvider";
 import { ApplicationContextProvider } from "@/context/ApplicationContext";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 
 export function AppProviders({
   children,
@@ -20,6 +21,7 @@ export function AppProviders({
       <QueryProvider>
         <ApplicationContextProvider>
           {children}
+          <Toaster richColors />
         </ApplicationContextProvider>
       </QueryProvider>
     </ThemeProvider>

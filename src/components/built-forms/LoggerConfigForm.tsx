@@ -15,12 +15,16 @@ import { DateTimePicker } from "../forms/DateTimePicker";
 import { FormSwitch } from "../forms/FormSwitch";
 import { FormLoggingInterval } from "../forms/FormLoggingInterval";
 import { calculateStopDate } from "@/lib/helpers";
+import { useUpdateLoggerConfigSettings } from "@/hooks/useLogger";
+import { UpdateLoggerConfigSettingsPayload } from "@/types/logger";
+import { Spinner } from "../ui/spinner";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
 export default function LoggerConfigSettingsForm() {
-
-  const {selectedLoggerId} = useApplicationContext();
+  const { selectedLoggerId } = useApplicationContext();
+  const { mutate, isPending, isSuccess, isError, error } = useUpdateLoggerConfigSettings();
 
   const form = useForm<LoggerConfigSettingValues>({
     resolver: zodResolver(loggerConfigSettingsSchema),
@@ -38,7 +42,8 @@ export default function LoggerConfigSettingsForm() {
   });
 
   function onSubmit(values: LoggerConfigSettingValues) {
-    const payload = {
+    
+    const payload: UpdateLoggerConfigSettingsPayload = {
       ...values,
 
       startDate: values.startDate
@@ -48,14 +53,26 @@ export default function LoggerConfigSettingsForm() {
       stopDate: values.stopDate
         ? Math.floor(values.stopDate.getTime() / 1000)
         : 0,
+
+      //Grab the selected logger id form the application context.
+      loggerId: selectedLoggerId,
     };
 
-    //Grab the selected logger id form the application context.
-    payload.loggerId = selectedLoggerId;
-
-    console.log("API payload:", payload);
-
     // Send payload to the API here
+    mutate({ data: payload },{
+      onSuccess: () =>{
+        toast.success("Logger configuration saved successfully!")
+      },
+      onError: (error) =>{
+        toast.error("Failed to save configuration", {
+            description: error?.message || "Please try again.",
+          })
+      }
+    });
+
+    console.log('isSuccess', isSuccess);
+    console.log('isError', isError);
+    console.log('API Error', error);
   }
 
   const startDate = form.watch("startDate");
@@ -117,6 +134,7 @@ export default function LoggerConfigSettingsForm() {
       className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
     >
       <div className="md:col-span-2">
+      {selectedLoggerId} {typeof selectedLoggerId}
         <FormTextField
           name="loggerName"
           label="Logger Name"
@@ -360,7 +378,9 @@ export default function LoggerConfigSettingsForm() {
         />
       </div>
 
-      <Button type="submit">Save settings</Button>
+      <Button type="submit" disabled={isPending}>
+        {isPending ? <><Spinner data-icon="inline-start" />Saving...</> : "Save"}
+      </Button>
     </form>
   );
 }

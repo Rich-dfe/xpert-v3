@@ -189,6 +189,7 @@ const isGroup = Number(selectedGroupId) >= 0;
 const { data: groupData, isLoading: isGroupLoading } = useListLoggersByCustomerUserGroup(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: isGroup });
 const { data: userData, isLoading: isUserLoading } = useListLoggersByCustomerUser(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: !isGroup });
 
+const loggers = isGroup ? groupData : userData;
 // Determine the unified loading state based on which query is active
 const isLoggersLoading = isGroup ? isGroupLoading : isUserLoading;
 
