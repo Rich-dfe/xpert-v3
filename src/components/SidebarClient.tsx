@@ -99,6 +99,8 @@ const {
   setSelectedGroupId,
   selectedLoggerId,
   setSelectedLoggerId,
+  selectedLoggerUid,
+  setSelectedLoggerUid
 } = useApplicationContext();
 
 const effectiveCustomerId = isSuperOrAdmin(user)
@@ -128,11 +130,7 @@ const handleGroupChange = (
   setSelectedGroupId(e.target.value);
 };
 
-const handleLoggerChange = (
-  e: React.ChangeEvent<HTMLSelectElement>
-) => {
-  setSelectedLoggerId(e.target.value);
-};
+
 
 //------------------------------------------------------
 
@@ -190,6 +188,21 @@ const { data: groupData, isLoading: isGroupLoading } = useListLoggersByCustomerU
 const { data: userData, isLoading: isUserLoading } = useListLoggersByCustomerUser(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: !isGroup });
 
 const loggers = isGroup ? groupData : userData;
+console.log('LOGGERS',loggers);
+
+const handleLoggerChange = (
+  e: React.ChangeEvent<HTMLSelectElement>
+) => {
+  const loggerId = e.target.value;
+
+  const selectedLogger = loggers?.find(
+    logger => logger.id.toString() === loggerId
+  );
+
+  setSelectedLoggerId(e.target.value);
+  setSelectedLoggerUid(selectedLogger?.loggerUid ?? null);
+};
+
 // Determine the unified loading state based on which query is active
 const isLoggersLoading = isGroup ? isGroupLoading : isUserLoading;
 
@@ -222,7 +235,7 @@ const loggerOptions = isGroup
             </Link>
           </SidebarMenuButton>
           <SessionMonitor />
-          {isSuper(user) && <span>super-user -{selectedCustomerId} - {selectedUserId} - {selectedGroupId} - {selectedLoggerId}</span>}
+          {isSuper(user) && <span>super-user -{selectedCustomerId} - {selectedUserId} - {selectedGroupId} - {selectedLoggerId} - {selectedLoggerUid}</span>}
         </SidebarMenu>
       </SidebarHeader>
 
