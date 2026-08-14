@@ -12,4 +12,5 @@ export type UpdateLoggerConfigSettingsPayload =
     startDate: number;
     stopDate: number;
     loggerId: string;
+    loggerUid: number | null;
   };

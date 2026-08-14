@@ -187,9 +187,10 @@ const isGroup = Number(selectedGroupId) >= 0;
 const { data: groupData, isLoading: isGroupLoading } = useListLoggersByCustomerUserGroup(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: isGroup });
 const { data: userData, isLoading: isUserLoading } = useListLoggersByCustomerUser(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: !isGroup });
 
+//Assign whichever data is returned to the loggers variable for use in the handleLoggerChange function
 const loggers = isGroup ? groupData : userData;
-console.log('LOGGERS',loggers);
 
+//This handler because it could be declared before 'loggers' variable was declared (just above).
 const handleLoggerChange = (
   e: React.ChangeEvent<HTMLSelectElement>
 ) => {
@@ -235,7 +236,7 @@ const loggerOptions = isGroup
             </Link>
           </SidebarMenuButton>
           <SessionMonitor />
-          {isSuper(user) && <span>super-user -{selectedCustomerId} - {selectedUserId} - {selectedGroupId} - {selectedLoggerId} - {selectedLoggerUid}</span>}
+          {<span>{selectedCustomerId} - {selectedUserId} - {selectedGroupId} - {selectedLoggerId} - {selectedLoggerUid}</span>}
         </SidebarMenu>
       </SidebarHeader>
 

@@ -16,7 +16,7 @@ export interface ApplicationContextType {
   setSelectedLoggerId: (id: string) => void;
 
   selectedLoggerUid: number | null;
-setSelectedLoggerUid: (id: number | null) => void;
+  setSelectedLoggerUid: (id: number | null) => void;
 }
 
 export const ApplicationContext =

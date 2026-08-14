@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export default function LoggerConfigSettingsForm() {
-  const { selectedLoggerId } = useApplicationContext();
+  const { selectedLoggerId, selectedLoggerUid } = useApplicationContext();
   const { mutate, isPending, isSuccess, isError, error } = useUpdateLoggerConfigSettings();
 
   const form = useForm<LoggerConfigSettingValues>({
@@ -56,6 +56,7 @@ export default function LoggerConfigSettingsForm() {
 
       //Grab the selected logger id form the application context.
       loggerId: selectedLoggerId,
+      loggerUid: selectedLoggerUid,
     };
 
     // Send payload to the API here

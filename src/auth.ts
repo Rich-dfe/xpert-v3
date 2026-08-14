@@ -42,7 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             cognitoProfile.email,
             account.id_token,
           );
-
+          
           token.id = dbUser.id.toString();
           token.customerId = dbUser.customerId.toString();
         }
