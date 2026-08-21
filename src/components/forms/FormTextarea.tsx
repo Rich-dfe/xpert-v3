@@ -1,38 +1,48 @@
 "use client";
 
 import { Textarea } from "../ui/textarea";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { Control, Controller,FieldValues,Path } from "react-hook-form";
 
-interface FormTextareaProps {
-  name: string;
+interface FormTextareaProps<T extends FieldValues> {
+  name: Path<T>;
   label: string;
   placeholder?: string;
-  register: UseFormRegister<any>;
-  errors: FieldErrors;
+  control: Control<T>;
   disabled?: boolean;
   required?:boolean;
 }
 
-export function FormTextarea({
-  name,
+export function FormTextarea<T extends FieldValues>({
+  name: fieldName,
   label,
   placeholder,
-  register,
-  errors,
+  control,
   disabled,
   required
-}: FormTextareaProps) {
+}: FormTextareaProps<T>) {
   return (
     <div className="space-y-2">
-      <label htmlFor={name} className="text-sm font-medium">{label}{required && " *"}</label>
+      <label htmlFor={fieldName} className="text-sm font-medium">
+        {label}
+        {required && " *"}
+      </label>
+      <Controller
+        name={fieldName}
+        control={control}
+        render={({ field, fieldState }) => (
+          <>
+            <Textarea id={fieldName} placeholder={placeholder} disabled={disabled} {...field} />
 
-      <Textarea id={name} placeholder={placeholder} disabled={disabled} {...register(name)} />
-    
-      {errors[name] && (
-      <p className="text-sm text-destructive">
-        {errors[name]?.message as string}
-      </p>
-    )}
+            {fieldState.error && (
+              <p className="text-sm text-destructive">
+                {fieldState.error.message}
+              </p>
+            )}
+          </>
+        )}
+      />
     </div>
   );
 }
+
+

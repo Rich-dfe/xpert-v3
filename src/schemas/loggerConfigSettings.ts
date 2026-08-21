@@ -11,5 +11,17 @@ export const loggerConfigSettingsSchema = z.object({
     applyToGroup: z.boolean(),
     //loggerId: z.string(),
 })
+.refine((data) =>{
+    if(!data.startDate || !data.stopDate){
+        return true;
+    }
+
+    return data.startDate < data.stopDate;
+},
+{
+    message: "Start date must be before stop date.",
+    path: ["stopDate"],
+}
+)
 
 export type LoggerConfigSettingValues = z.infer<typeof loggerConfigSettingsSchema>;

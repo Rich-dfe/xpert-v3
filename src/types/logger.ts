@@ -13,4 +13,14 @@ export type UpdateLoggerConfigSettingsPayload =
     stopDate: number;
     loggerId: string;
     loggerUid: number | null;
+    groupId?: string;
+  };
+
+  export type LoggerConfigSettingsResponse =
+  Omit<LoggerConfigSettingValues, "startDate" | "stopDate"> & {
+    startDate: number;
+    stopDate: number;
+    loggerId: string;
+    loggerUid: number | null;
+    groupId?: string;
   };

@@ -2,7 +2,7 @@ import { LoggerListProps } from "@/types";
 import { apiFetch } from "./client";
 import { serverFetch } from "./server";
 import { LoggerListSelect } from "@/types/logger";
-import { UpdateLoggerConfigSettingsPayload } from "@/types/logger";
+import { UpdateLoggerConfigSettingsPayload, LoggerConfigSettingsResponse } from "@/types/logger";
 
 export const loggerService = {
     server:{
@@ -18,5 +18,8 @@ export const loggerService = {
 
       updateLoggerConfigSettings: (payload: UpdateLoggerConfigSettingsPayload, idToken?:string) =>
         apiFetch<UpdateLoggerConfigSettingsPayload[]>(`/loggers/config`,{method: "PATCH", body: JSON.stringify(payload),},idToken),
+
+      fetchLoggerConfigSettings: (loggerId:string, idToken?:string) =>
+        apiFetch<LoggerConfigSettingsResponse[]>(`/loggers/${loggerId}/config`,{},idToken),
     }   
 }

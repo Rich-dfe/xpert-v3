@@ -44,7 +44,12 @@ name,
         {required && <span className="text-destructive"> *</span>}
       </label>
 
-      <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+      <Select value={value} onValueChange={(value) => {
+        if(value === ""){
+          return;
+        }
+        onValueChange(value);
+      }} disabled={disabled}>
         <SelectTrigger>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

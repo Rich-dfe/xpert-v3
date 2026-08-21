@@ -1,38 +1,51 @@
 "use client";
 
 import { Input } from "../ui/input";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
-interface FormTextFieldProps {
-  name: string;
+interface FormTextFieldProps<T extends FieldValues> {
+  name: Path<T>;
   label: string;
   placeholder?: string;
-  register: UseFormRegister<any>;
-  errors: FieldErrors;
+  control: Control<T>;
   disabled?: boolean;
-  required?:boolean;
+  required?: boolean;
 }
 
-export function FormTextField({
-  name,
+export function FormTextField<T extends FieldValues>({
+  name: fieldName,
   label,
   placeholder,
-  register,
-  errors,
+  control,
   disabled,
-  required
-}: FormTextFieldProps) {
+  required,
+}: FormTextFieldProps<T>) {
   return (
     <div className="space-y-2">
-      <label htmlFor={name} className="text-sm font-medium">{label}{required && " *"}</label>
+      <label htmlFor={fieldName} className="text-sm font-medium">
+        {label}
+        {required && " *"}
+      </label>
+      <Controller
+        name={fieldName}
+        control={control}
+        render={({ field, fieldState }) => (
+          <>
+            <Input
+              id={fieldName}
+              placeholder={placeholder}
+              disabled={disabled}
+              {...field}
+            />
 
-      <Input id={name} placeholder={placeholder} disabled={disabled} {...register(name)} />
-    
-      {errors[name] && (
-      <p className="text-sm text-destructive">
-        {errors[name]?.message as string}
-      </p>
-    )}
+            {fieldState.error && (
+              <p className="text-sm text-destructive">
+                {fieldState.error.message}
+              </p>
+            )}
+          </>
+        )}
+      />
     </div>
   );
 }

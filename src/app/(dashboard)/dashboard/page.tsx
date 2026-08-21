@@ -8,10 +8,10 @@ export default async function Home() {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <FormCard
-        title="Logger Config"
+        title="Map"
         description="Configure the main logger settings."
       >
-        <LoggerConfigSettingsForm />
+      <div>Xpert</div>
       </FormCard>
 
       <FormCard

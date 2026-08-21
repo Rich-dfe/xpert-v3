@@ -17,6 +17,9 @@ export interface ApplicationContextType {
 
   selectedLoggerUid: number | null;
   setSelectedLoggerUid: (id: number | null) => void;
+
+  loggerSettingsVersion: number | null;
+  setLoggerSettingsVersion: (id: number | null) => void;
 }
 
 export const ApplicationContext =
@@ -32,6 +35,7 @@ export const ApplicationContext =
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [selectedLoggerId, setSelectedLoggerId] = useState("");
   const [selectedLoggerUid, setSelectedLoggerUid] = useState<number | null>(null);
+  const [loggerSettingsVersion, setLoggerSettingsVersion] = useState<number | null>(null);
 
   return (
     <ApplicationContext.Provider
@@ -45,7 +49,9 @@ export const ApplicationContext =
         selectedLoggerId,
         setSelectedLoggerId,
         selectedLoggerUid,
-        setSelectedLoggerUid
+        setSelectedLoggerUid,
+        loggerSettingsVersion,
+        setLoggerSettingsVersion
       }}
     >
       {children}

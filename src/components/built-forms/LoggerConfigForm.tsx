@@ -15,16 +15,32 @@ import { DateTimePicker } from "../forms/DateTimePicker";
 import { FormSwitch } from "../forms/FormSwitch";
 import { FormLoggingInterval } from "../forms/FormLoggingInterval";
 import { calculateStopDate } from "@/lib/helpers";
-import { useUpdateLoggerConfigSettings } from "@/hooks/useLogger";
+import {
+  useUpdateLoggerConfigSettings,
+  useFetchLoggerConfigSettings,
+} from "@/hooks/useLogger";
 import { UpdateLoggerConfigSettingsPayload } from "@/types/logger";
 import { Spinner } from "../ui/spinner";
 import { toast } from "sonner";
-
+import { Input } from "../ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function LoggerConfigSettingsForm() {
-  const { selectedLoggerId, selectedLoggerUid } = useApplicationContext();
-  const { mutate, isPending, isSuccess, isError, error } = useUpdateLoggerConfigSettings();
+  const { selectedLoggerId, selectedLoggerUid, selectedGroupId, loggerSettingsVersion, setLoggerSettingsVersion } =
+    useApplicationContext();
+  const {
+    mutate,
+    isPending: isUpdatePending,
+    isSuccess: isUpdateSuccess,
+    isError: isUpdateError,
+    error: updateError,
+  } = useUpdateLoggerConfigSettings();
+  const {
+    data: fetchData,
+    isLoading: isFetchLoading,
+    isError: isFetchError,
+    error: fetchError,
+  } = useFetchLoggerConfigSettings(selectedLoggerId);
 
   const form = useForm<LoggerConfigSettingValues>({
     resolver: zodResolver(loggerConfigSettingsSchema),
@@ -42,7 +58,6 @@ export default function LoggerConfigSettingsForm() {
   });
 
   function onSubmit(values: LoggerConfigSettingValues) {
-    
     const payload: UpdateLoggerConfigSettingsPayload = {
       ...values,
 
@@ -57,23 +72,27 @@ export default function LoggerConfigSettingsForm() {
       //Grab the selected logger id form the application context.
       loggerId: selectedLoggerId,
       loggerUid: selectedLoggerUid,
+      groupId: selectedGroupId,
     };
 
     // Send payload to the API here
-    mutate({ data: payload },{
-      onSuccess: () =>{
-        toast.success("Logger configuration saved successfully!")
-      },
-      onError: (error) =>{
-        toast.error("Failed to save configuration", {
+    mutate(
+      { data: payload },
+      {
+        onSuccess: () => {
+          toast.success("Logger configuration saved successfully!");
+        },
+        onError: (error) => {
+          toast.error("Failed to save configuration", {
             description: error?.message || "Please try again.",
-          })
-      }
-    });
+          });
+        },
+      },
+    );
 
-    console.log('isSuccess', isSuccess);
-    console.log('isError', isError);
-    console.log('API Error', error);
+    console.log("isUpdateSuccess", isUpdateSuccess);
+    console.log("isUpdateError", isUpdateError);
+    console.log("API Error", updateError);
   }
 
   const startDate = form.watch("startDate");
@@ -81,6 +100,33 @@ export default function LoggerConfigSettingsForm() {
   const continuousLoggingState = form.watch("continuousLogging");
   const loggingIntervalValue = form.watch("loggingInterval");
   const continuousLoggingAllowed = loggingIntervalValue >= 60;
+
+  // useEffect(() => {
+  //   if (fetchData) {
+  //     console.log("Fetched config data", fetchData);
+  //   }
+  // }, [fetchData, form]);
+
+  useEffect(() => {
+    if (fetchData?.length) {
+      const data = fetchData[0];
+      //Set the version number in the application context
+      setLoggerSettingsVersion(data.loggerSettingsVersion)
+
+      form.reset({
+        continuousLogging: data.stopDate === 0,
+        startDate:
+          data.startDate === 0 ? undefined : new Date(data.startDate * 1000),
+        stopDate:
+          data.stopDate === 0 ? undefined : new Date(data.stopDate * 1000),
+        loggerNotes: data.loggerNotes === null ? "" : data.loggerNotes,
+        loggingInterval: data.loggingInterval,
+        timezone: String(Number(data.timezone)),
+        applyToGroup: false,
+        loggerName:data.loggerName,
+      });
+    }
+  }, [fetchData, form]);
 
   useEffect(() => {
     // Condition 3:
@@ -115,9 +161,7 @@ export default function LoggerConfigSettingsForm() {
     // Continuous logging is enabled and the interval is 60 seconds or more.
     if (continuousLoggingState) {
       form.setValue("startDate", undefined);
-
       form.setValue("stopDate", undefined);
-
       return;
     }
 
@@ -135,13 +179,12 @@ export default function LoggerConfigSettingsForm() {
       className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
     >
       <div className="md:col-span-2">
-      {selectedLoggerId} {typeof selectedLoggerId}
-        <FormTextField
+        <div className="text-green-500 text-xl py-1">Server Settings Version: {loggerSettingsVersion}</div>
+        <FormTextField<LoggerConfigSettingValues>
           name="loggerName"
           label="Logger Name"
           placeholder="Enter logger name"
-          register={form.register}
-          errors={form.formState.errors}
+          control={form.control}
         />
       </div>
 
@@ -374,13 +417,19 @@ export default function LoggerConfigSettingsForm() {
           name="loggerNotes"
           label="Logger Notes"
           placeholder="Enter some notes"
-          register={form.register}
-          errors={form.formState.errors}
+          control={form.control}
         />
       </div>
 
-      <Button type="submit" disabled={isPending}>
-        {isPending ? <><Spinner data-icon="inline-start" />Saving...</> : "Save"}
+      <Button type="submit" disabled={isUpdatePending}>
+        {isUpdatePending ? (
+          <>
+            <Spinner data-icon="inline-start" />
+            Saving...
+          </>
+        ) : (
+          "Save"
+        )}
       </Button>
     </form>
   );

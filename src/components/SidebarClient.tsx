@@ -1,6 +1,17 @@
-'use client';
+"use client";
 
-import { Settings, Home, ChartSpline, UserRoundArrowLeft, HatGlasses, HardDriveDownload, CircleQuestionMark, FileOutput, ShieldCog, Blend } from "lucide-react";
+import {
+  Settings,
+  Home,
+  ChartSpline,
+  UserRoundArrowLeft,
+  HatGlasses,
+  HardDriveDownload,
+  CircleQuestionMark,
+  FileOutput,
+  ShieldCog,
+  Blend,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,7 +32,10 @@ import { isSuper } from "@/lib/helpers";
 import { Customer } from "@/types/customer";
 import { useUsersByCustomer } from "@/hooks/useUser";
 import { useListGroupsByUser } from "@/hooks/useGroup";
-import { useListLoggersByCustomerUser, useListLoggersByCustomerUserGroup } from "@/hooks/useLogger";
+import {
+  useListLoggersByCustomerUser,
+  useListLoggersByCustomerUserGroup,
+} from "@/hooks/useLogger";
 import { isSuperOrAdmin } from "@/lib/helpers";
 import { useApplicationContext } from "@/context/ApplicationContext";
 import SessionMonitor from "./SessionMonitor";
@@ -87,138 +101,145 @@ interface SidebarClientProps {
   customers: Customer[];
 }
 
-const SidebarClient = ({user, customers}: SidebarClientProps) => {
-//The customerid can be from the customer drop down menu.
-//THIS NEEDS TO BE DEPENDENT ON THE USER ROLE
-const {
-  selectedCustomerId,
-  setSelectedCustomerId,
-  selectedUserId,
-  setSelectedUserId,
-  selectedGroupId,
-  setSelectedGroupId,
-  selectedLoggerId,
-  setSelectedLoggerId,
-  selectedLoggerUid,
-  setSelectedLoggerUid
-} = useApplicationContext();
+const SidebarClient = ({ user, customers }: SidebarClientProps) => {
+  //The customerid can be from the customer drop down menu.
+  //THIS NEEDS TO BE DEPENDENT ON THE USER ROLE
+  const {
+    selectedCustomerId,
+    setSelectedCustomerId,
+    selectedUserId,
+    setSelectedUserId,
+    selectedGroupId,
+    setSelectedGroupId,
+    selectedLoggerId,
+    setSelectedLoggerId,
+    selectedLoggerUid,
+    setSelectedLoggerUid,
+  } = useApplicationContext();
 
-const effectiveCustomerId = isSuperOrAdmin(user)
-  ? selectedCustomerId
-  : user.customerId;
+  const effectiveCustomerId = isSuperOrAdmin(user)
+    ? selectedCustomerId
+    : user.customerId;
 
-const effectiveUserId = isSuperOrAdmin(user)
-  ? selectedUserId
-  : user.id;
+  const effectiveUserId = isSuperOrAdmin(user) ? selectedUserId : user.id;
 
-// ------------- SELECT HANDLERS ---------------------
-const handleCustomerChange = (
-  e: React.ChangeEvent<HTMLSelectElement>
-) => {
-  setSelectedCustomerId(e.target.value);
-};
+  // ------------- SELECT HANDLERS ---------------------
+  const handleCustomerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCustomerId(e.target.value);
+  };
 
-const handleUserChange = (
-  e: React.ChangeEvent<HTMLSelectElement>
-) => {
-  setSelectedUserId(e.target.value);
-};
+  const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedUserId(e.target.value);
+  };
 
-const handleGroupChange = (
-  e: React.ChangeEvent<HTMLSelectElement>
-) => {
-  setSelectedGroupId(e.target.value);
-};
+  const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedGroupId(e.target.value);
+  };
 
+  //------------------------------------------------------
 
+  const customerOptions = customers.map((customer: any) => ({
+    value: customer.id,
+    label: customer.companyName,
+  }));
 
-//------------------------------------------------------
+  // ------ Fetch 'User data based on the selected customer -----------------
+  const {
+    data: users = [],
+    isLoading: isUsersLoading,
+    isError: isUsersError,
+    error: usersError,
+  } = useUsersByCustomer(effectiveCustomerId, isSuperOrAdmin(user));
+  //Check that users is an array and map user data for select menu attributes.
+  //const userOptions = (Array.isArray(users) ? users : []).map((user: any) => ({
+  const userOptions = users.map((user: any) => ({
+    value: user.id,
+    label: user.name,
+  }));
+  // -------------------------------------------------------------------------
 
-  const customerOptions = customers.map((customer:any) => ({
-  value: customer.id,
-  label: customer.companyName,
-}));
+  // --------- Fetch 'Group' data based on the selected user -----------------
 
-// ------ Fetch 'User data based on the selected customer -----------------
-const { data: users = [], isLoading: isUsersLoading, isError: isUsersError, error: usersError} = useUsersByCustomer(effectiveCustomerId, isSuperOrAdmin(user));
-//Check that users is an array and map user data for select menu attributes.
-//const userOptions = (Array.isArray(users) ? users : []).map((user: any) => ({
-const userOptions = users.map((user: any) => ({
-  value: user.id,
-  label: user.name,
-}));
-// -------------------------------------------------------------------------
+  //If the user has a normal 'user' role set the userId for the groups data to their auth id (user id from xpert RDS).
+  //Else set it to the userId determined by the 'Users' select menu which is only available to admin or super-user roles
+  const {
+    data: groups = [],
+    isLoading: isGroupsLoading,
+    isError: isGroupsError,
+    error: groupsError,
+  } = useListGroupsByUser(effectiveCustomerId, effectiveUserId);
 
-// --------- Fetch 'Group' data based on the selected user -----------------
+  //Add this option to the 'Groups' select menu to give the user an option to view all their loggers without filtering by group.
+  const allGroup = {
+    id: -1,
+    userId: 0,
+    groupName: "Show all loggers",
+    notes: "A group of all loggers",
+  };
 
-//If the user has a normal 'user' role set the userId for the groups data to their auth id (user id from xpert RDS).
-//Else set it to the userId determioned by the 'Users' select menu which is only available to admin or super-user roles
-const { data: groups = [], isLoading: isGroupsLoading, isError: isGroupsError, error: groupsError} = useListGroupsByUser(effectiveCustomerId, effectiveUserId);
+  let updatedGroups = groups;
+  if (groups.length > 0) {
+    updatedGroups = [allGroup, ...groups];
+  }
 
-//Add this option to the 'Groups' select menu to give the user an option to view all their loggers without filtering by group.
-const allGroup = {
-  id: -1,
-  userId: 0,
-  groupName: "Show all loggers",
-  notes: "A group of all loggers"
-};
+  //Map user data for select menu attributes
+  const groupOptions = updatedGroups.map((group: any) => ({
+    value: group.id,
+    label: group.groupName,
+  }));
+  // -------------------------------------------------------------------------
 
-let updatedGroups = groups;
-if(groups.length > 0){
-  updatedGroups = [allGroup,...groups,];
-}
+  // --------- Fetch 'Logger' data based on the selected user -----------------
 
+  //If the group id >= 0 fetch the loggers belonging to the selected group.
+  //else fetch all loggers belonging to the selected user
 
-//Map user data for select menu attributes
-const groupOptions = updatedGroups.map((group:any) => ({
-  value: group.id,
-  label: group.groupName,
-}));
-// -------------------------------------------------------------------------
+  //If a group is selected: isGroup = true.
+  const isGroup = Number(selectedGroupId) >= 0;
 
-// --------- Fetch 'Logger' data based on the selected user -----------------
+  const { data: groupData, isLoading: isGroupLoading } =
+    useListLoggersByCustomerUserGroup(
+      effectiveCustomerId,
+      effectiveUserId,
+      selectedGroupId,
+      { enabled: isGroup },
+    );
+  const { data: userData, isLoading: isUserLoading } =
+    useListLoggersByCustomerUser(
+      effectiveCustomerId,
+      effectiveUserId,
+      selectedGroupId,
+      { enabled: !isGroup },
+    );
 
-//If the group id >= 0 fetch the loggers belonging to the selected group.
-//else fetch all loggers belonging to the selected user 
+  //Assign whichever data is returned to the loggers variable for use in the handleLoggerChange function
+  const loggers = isGroup ? groupData : userData;
 
-//If a group is selected: isGroup = true. 
-const isGroup = Number(selectedGroupId) >= 0;
+  //This handler because it could be declared before 'loggers' variable was declared (just above).
+  const handleLoggerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const loggerId = e.target.value;
 
-const { data: groupData, isLoading: isGroupLoading } = useListLoggersByCustomerUserGroup(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: isGroup });
-const { data: userData, isLoading: isUserLoading } = useListLoggersByCustomerUser(effectiveCustomerId, effectiveUserId,selectedGroupId, { enabled: !isGroup });
+    const selectedLogger = loggers?.find(
+      (logger) => logger.id.toString() === loggerId,
+    );
 
-//Assign whichever data is returned to the loggers variable for use in the handleLoggerChange function
-const loggers = isGroup ? groupData : userData;
+    setSelectedLoggerId(e.target.value);
+    setSelectedLoggerUid(selectedLogger?.loggerUid ?? null);
+  };
 
-//This handler because it could be declared before 'loggers' variable was declared (just above).
-const handleLoggerChange = (
-  e: React.ChangeEvent<HTMLSelectElement>
-) => {
-  const loggerId = e.target.value;
+  // Determine the unified loading state based on which query is active
+  const isLoggersLoading = isGroup ? isGroupLoading : isUserLoading;
 
-  const selectedLogger = loggers?.find(
-    logger => logger.id.toString() === loggerId
-  );
-
-  setSelectedLoggerId(e.target.value);
-  setSelectedLoggerUid(selectedLogger?.loggerUid ?? null);
-};
-
-// Determine the unified loading state based on which query is active
-const isLoggersLoading = isGroup ? isGroupLoading : isUserLoading;
-
-// 3. Map the data directly out of whichever query is active
-const loggerOptions = isGroup
-  ? ((groupData || []) as any[]).map((logger: any) => ({
-      value: logger.id,
-      label: logger.loggerName,
-    }))
-  : ((userData || []) as any[]).map((logger: any) => ({
-      value: logger.id,
-      label: logger.loggerName, // Map user data for select menu attributes here
-    }));
-
-
+  // 3. Map the data directly out of whichever query is active
+  const loggerOptions = isGroup
+    ? ((groupData || []) as any[]).map((logger: any) => ({
+        value: logger.id,
+        label: logger.loggerName,
+      }))
+    : ((userData || []) as any[]).map((logger: any) => ({
+        value: logger.id,
+        label: logger.loggerName, // Map user data for select menu attributes here
+      }));
 
   return (
     <Sidebar collapsible="icon" className="border-r border-green-500">
@@ -236,17 +257,46 @@ const loggerOptions = isGroup
             </Link>
           </SidebarMenuButton>
           <SessionMonitor />
-          {<span>{selectedCustomerId} - {selectedUserId} - {selectedGroupId} - {selectedLoggerId} - {selectedLoggerUid}</span>}
+          {
+            <span>
+              {selectedCustomerId} - {selectedUserId} - {selectedGroupId} -{" "}
+              {selectedLoggerId} - {selectedLoggerUid}
+            </span>
+          }
         </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
-      {/* Only show the customers and users select menus if the user is an admin or super user */}
-      {isSuperOrAdmin(user) && <DropdownBox label="Customers" options={customerOptions} onChange={handleCustomerChange} placeholder="Select Customer"/>}
-      {isSuperOrAdmin(user) && <DropdownBox label={isUsersLoading ? "Loading..." : "Users"} options={userOptions} onChange={handleUserChange} placeholder="Select User"/>}
-      <DropdownBox label={isGroupsLoading ? "Loading..." : "Groups"} options={groupOptions} onChange={handleGroupChange} placeholder="Select Group"/>
-      <DropdownBox label={isLoggersLoading ? "Loading..." : "Loggers"} options={loggerOptions} onChange={handleLoggerChange} placeholder="Select Logger"/>
-        
+        {/* Only show the customers and users select menus if the user is an admin or super user */}
+        {isSuperOrAdmin(user) && (
+          <DropdownBox
+            label="Customers"
+            options={customerOptions}
+            onChange={handleCustomerChange}
+            placeholder="Select Customer"
+          />
+        )}
+        {isSuperOrAdmin(user) && (
+          <DropdownBox
+            label={isUsersLoading ? "Loading..." : "Users"}
+            options={userOptions}
+            onChange={handleUserChange}
+            placeholder="Select User"
+          />
+        )}
+        <DropdownBox
+          label={isGroupsLoading ? "Loading..." : "Groups"}
+          options={groupOptions}
+          onChange={handleGroupChange}
+          placeholder="Select Group"
+        />
+        <DropdownBox
+          label={isLoggersLoading ? "Loading..." : "Loggers"}
+          options={loggerOptions}
+          onChange={handleLoggerChange}
+          placeholder="Select Logger"
+        />
+
         <SidebarGroup />
         <SidebarGroupLabel>My Loggers</SidebarGroupLabel>
         <SidebarGroupContent>
@@ -261,7 +311,6 @@ const loggerOptions = isGroup
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
-
           </SidebarMenu>
         </SidebarGroupContent>
         <SidebarGroup />

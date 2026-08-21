@@ -141,12 +141,20 @@ export function FormLoggingInterval({
   error,
   disabled,
 }: FormLoggingIntervalProps) {
+
+  // console.log("FormLoggingInterval value:", value);
+  // console.log("FormLoggingInterval String value:", String(value));
   return (
     <FormSelect
       name={name}
       label="Logging interval"
       value={String(value)}
-      onValueChange={(value) => onChange(Number(value))}
+      onValueChange={(value) => {
+        if (value === "") {
+          return;
+        }
+        onChange(Number(value));
+      }}
       options={options}
       error={error}
       disabled={disabled}

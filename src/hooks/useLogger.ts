@@ -3,7 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { loggerService } from "@/service/api/loggerService";
 import { useSession } from "next-auth/react";
-import { UpdateLoggerConfigSettingsPayload, LoggerListSelect } from "@/types/logger";
+import { UpdateLoggerConfigSettingsPayload, LoggerListSelect, LoggerConfigSettingsResponse } from "@/types/logger";
+import { LoggerConfigSettingValues } from "@/schemas/loggerConfigSettings";
 
 export function useListLoggersByCustomerUser(custId: string, userId: string, groupId: string, options?:any) {
 
@@ -49,5 +50,22 @@ export function useUpdateLoggerConfigSettings(options?: any) {
     // },
 
     ...options,
+  });
+}
+
+export function useFetchLoggerConfigSettings(loggerId: string) {
+  const { data: session } = useSession();
+  const idToken = session?.idToken;
+
+  return useQuery<LoggerConfigSettingsResponse[], Error>({
+    queryKey: ["configSettings", loggerId],
+
+    queryFn: () =>
+      loggerService.client.fetchLoggerConfigSettings(
+        loggerId,
+        idToken,
+      ),
+
+    enabled: !!loggerId,
   });
 }
