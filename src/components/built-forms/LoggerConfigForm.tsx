@@ -26,8 +26,14 @@ import { Input } from "../ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function LoggerConfigSettingsForm() {
-  const { selectedLoggerId, selectedLoggerUid, selectedGroupId, loggerSettingsVersion, setLoggerSettingsVersion } =
-    useApplicationContext();
+  const {
+    selectedLoggerId,
+    selectedLoggerUid,
+    selectedGroupId,
+    loggerSettingsVersion,
+    setLoggerSettingsVersion,
+    setLoggerTypeId,
+  } = useApplicationContext();
   const {
     mutate,
     isPending: isUpdatePending,
@@ -100,6 +106,8 @@ export default function LoggerConfigSettingsForm() {
   const continuousLoggingState = form.watch("continuousLogging");
   const loggingIntervalValue = form.watch("loggingInterval");
   const continuousLoggingAllowed = loggingIntervalValue >= 60;
+  const typeId = fetchData?.[0]?.typeId;
+  
 
   // useEffect(() => {
   //   if (fetchData) {
@@ -109,9 +117,12 @@ export default function LoggerConfigSettingsForm() {
 
   useEffect(() => {
     if (fetchData?.length) {
+      console.log("FETCHED DATA", fetchData[0]);
       const data = fetchData[0];
       //Set the version number in the application context
-      setLoggerSettingsVersion(data.loggerSettingsVersion)
+      setLoggerSettingsVersion(data.loggerSettingsVersion);
+      //Set the sensor typeId in the application context
+      setLoggerTypeId(data.typeId);
 
       form.reset({
         continuousLogging: data.stopDate === 0,
@@ -123,7 +134,7 @@ export default function LoggerConfigSettingsForm() {
         loggingInterval: data.loggingInterval,
         timezone: String(Number(data.timezone)),
         applyToGroup: false,
-        loggerName:data.loggerName,
+        loggerName: data.loggerName,
       });
     }
   }, [fetchData, form]);
@@ -179,7 +190,9 @@ export default function LoggerConfigSettingsForm() {
       className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
     >
       <div className="md:col-span-2">
-        <div className="text-green-500 text-xl py-1">Server Settings Version: {loggerSettingsVersion}</div>
+        <div className="text-green-500 text-xl py-1">
+          Server Settings Version: {loggerSettingsVersion}
+        </div>
         <FormTextField<LoggerConfigSettingValues>
           name="loggerName"
           label="Logger Name"

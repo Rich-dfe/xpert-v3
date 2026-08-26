@@ -23,4 +23,17 @@ export type UpdateLoggerConfigSettingsPayload =
     loggerId: string;
     loggerUid: number | null;
     groupId?: string;
+    loggerSettingsVersion: number;
+    typeId: number;
   };
+
+  export type SensorConfigSettingsResponse = {
+    sensorSetting: string
+  } 
+
+  export type UpdateSensorConfigSettingsPayload = {
+    sensorSetting: string,
+    typeId: number | null,
+    loggerUid: number | null,
+    loggerId:string
+  } 

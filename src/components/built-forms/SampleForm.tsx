@@ -47,7 +47,7 @@ export default function LoggerConfigSettingsForm() {
        className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
     >
 
-      <div className="md:col-span-2">
+      {/* <div className="md:col-span-2">
       <FormTextField
         name="loggerName"
         label="Logger Name"
@@ -55,7 +55,7 @@ export default function LoggerConfigSettingsForm() {
         register={form.register}
         errors={form.formState.errors}
       />
-      </div>
+      </div> */}
 
       <div>
       <FormLoggingInterval
@@ -149,13 +149,13 @@ export default function LoggerConfigSettingsForm() {
         )}
       </div>
 
-      <FormTextarea
+      {/* <FormTextarea
         name="loggerNotes"
         label="Logger Notes"
         placeholder="Enter some notes"
         register={form.register}
         errors={form.formState.errors}
-      />
+      /> */}
 
       <FormNumberField
         name="interval"
