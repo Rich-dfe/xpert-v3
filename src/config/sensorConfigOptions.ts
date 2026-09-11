@@ -18,6 +18,21 @@ export const sensorConfigOptions = {
       { value: "4", label: "Low" },
     ],
   },
+  4137: {
+    label: "Capacity",
+    options: [
+      { value: "0.10", label: "0.1mm" },
+      { value: "0.20", label: "0.2mm" },
+      { value: "0.30", label: "0.3mm" },
+      { value: "0.40", label: "0.4mm" },
+      { value: "0.50", label: "0.5mm" },
+      { value: "0.60", label: "0.6mm" },
+      { value: "0.70", label: "0.7mm" },
+      { value: "0.80", label: "0.8mm" },
+      { value: "0.90", label: "0.9mm" },
+      { value: "1.00", label: "1.0mm" },
+    ],
+  },
   4181: {
     label: "Units",
     options: [

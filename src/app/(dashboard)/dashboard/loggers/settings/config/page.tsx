@@ -3,7 +3,9 @@
 import { useApplicationContext } from "@/context/ApplicationContext";
 import LoggerConfigSettingsForm from "@/components/built-forms/LoggerConfigForm";
 import SensorConfigSettingsForm from "@/components/built-forms/SensorConfigForm";
+import CalibrationSettingsForm from "@/components/built-forms/CalibrationSettingsForm";
 import { FormCard } from "@/components/forms/FormCard";
+import { Separator } from "@/components/ui/separator";
 
 export default function LoggersPage() {
 const {
@@ -32,6 +34,8 @@ const {
           description="Configure sensor settings."
         >
           <SensorConfigSettingsForm />
+          <Separator />
+          <CalibrationSettingsForm />
         </FormCard>
   </div>
   );

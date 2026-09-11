@@ -1,14 +1,13 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
-interface FormNumberFieldProps {
-  name: string;
+interface FormNumberFieldProps<T extends FieldValues> {
+  name: Path<T>;
   label: string;
-  value: number;
-  onChange: (value: number) => void;
+  control: Control<T>;
   unit?: string;
-  error?: string;
   disabled?: boolean;
   required?: boolean;
   placeholder?: string;
@@ -16,46 +15,69 @@ interface FormNumberFieldProps {
   helpText?: string;
 }
 
-export function FormNumberField({
-  name,
+export function FormNumberField<T extends FieldValues>({
+  name: fieldName,
   label,
-  value,
-  onChange,
+  control,
   unit,
-  error,
   disabled,
   required,
   placeholder,
   step,
   helpText,
-}: FormNumberFieldProps) {
+}: FormNumberFieldProps<T>) {
   return (
     <div className="space-y-2">
-      <label htmlFor={name} className="text-sm font-medium">
+      <label htmlFor={fieldName} className="text-sm font-medium">
         {label}
 
-        {required && <span className="text-destructive"> *</span>}
+        {required && (
+          <span className="text-destructive"> *</span>
+        )}
       </label>
 
-      <div className="flex items-center gap-2">
-        <Input
-          id={name}
-          type="number"
-          step={step}
-          value={value}
-          onChange={(e) =>
-            onChange(Number(e.target.value))
-          }
-          disabled={disabled}
-          placeholder={placeholder}
-        />
+      <Controller
+        name={fieldName}
+        control={control}
+        render={({ field, fieldState }) => (
+          <>
+            <div className="flex items-center gap-2">
+              <Input
+                id={fieldName}
+                type="number"
+                step={step}
+                value={field.value ?? ""}
+                onChange={(e) =>
+                  field.onChange(Number(e.target.value))
+                }
+                onBlur={field.onBlur}
+                disabled={disabled}
+                placeholder={placeholder}
+                name={field.name}
+                ref={field.ref}
+              />
 
-        {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
-      </div>
+              {unit && (
+                <span className="text-sm text-muted-foreground">
+                  {unit}
+                </span>
+              )}
+            </div>
 
-      {helpText && <p className="text-sm text-muted-foreground">{helpText}</p>}
+            {helpText && (
+              <p className="text-sm text-muted-foreground">
+                {helpText}
+              </p>
+            )}
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+            {fieldState.error && (
+              <p className="text-sm text-destructive">
+                {fieldState.error.message}
+              </p>
+            )}
+          </>
+        )}
+      />
     </div>
   );
 }

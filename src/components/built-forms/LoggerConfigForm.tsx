@@ -117,7 +117,7 @@ export default function LoggerConfigSettingsForm() {
 
   useEffect(() => {
     if (fetchData?.length) {
-      console.log("FETCHED DATA", fetchData[0]);
+      //console.log("FETCHED DATA", fetchData[0]);
       const data = fetchData[0];
       //Set the version number in the application context
       setLoggerSettingsVersion(data.loggerSettingsVersion);

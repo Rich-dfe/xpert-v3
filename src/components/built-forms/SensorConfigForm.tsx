@@ -34,7 +34,7 @@ export default function SensorConfigSettingsForm() {
     isSuccess: isUpdateSuccess,
     isError: isUpdateError,
     error: updateError,
-  } = useUpdateSensorConfigSettings();
+  } = useUpdateSensorConfigSettings(selectedLoggerId);
 
   const sensorForm = useForm<SensorConfigSettingValues>({
     resolver: zodResolver(sensorConfigSettingsSchema),
@@ -43,7 +43,6 @@ export default function SensorConfigSettingsForm() {
     },
   });
 
-  console.log('FETCHED DATA',fetchSensorData);
   useEffect(() => {
     if (fetchSensorData !== undefined) {
       sensorForm.reset({
@@ -99,6 +98,7 @@ export default function SensorConfigSettingsForm() {
     >
       {selectedLoggerId} - {selectedLoggerUid} - {loggerTypeId}
       <pre>{JSON.stringify(fetchSensorData, null, 2)}</pre>
+      <div className="w-64">
       <FormSelect
         name="sensorSetting"
         label={sensorConfig.label}
@@ -107,7 +107,9 @@ export default function SensorConfigSettingsForm() {
         placeholder="Please Select"
         options={sensorConfig.options}
       />
-      <Button type="submit" disabled={isUpdatePending}>
+      </div>
+      <div></div>
+      <Button type="submit" disabled={isUpdatePending} className="mb-5">
         {isUpdatePending ? (
           <>
             <Spinner data-icon="inline-start" />

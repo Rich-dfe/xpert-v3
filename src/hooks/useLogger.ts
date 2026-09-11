@@ -10,6 +10,7 @@ import {
   SensorConfigSettingsResponse,
   UpdateSensorConfigSettingsPayload,
 } from "@/types/logger";
+import { LoggerCalibrationSettingsResponse } from "@/types/calibration";
 import { LoggerConfigSettingValues } from "@/schemas/loggerConfigSettings";
 
 export function useListLoggersByCustomerUser(
@@ -104,7 +105,7 @@ export function useFetchSensorConfigSettings(
   });
 }
 
-export function useUpdateSensorConfigSettings(options?: any) {
+export function useUpdateSensorConfigSettings(loggerId: string) {
   const { data: session } = useSession();
   const idToken = session?.idToken;
 
@@ -113,13 +114,13 @@ export function useUpdateSensorConfigSettings(options?: any) {
   return useMutation({
     mutationFn: ({ data }: { data: UpdateSensorConfigSettingsPayload }) =>
       loggerService.client.updateSensorConfigSettings(data, idToken),
-    ...options,
-    onSuccess: (...args) => {
+   
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["sensorConfigSettings"],
+        queryKey: ["sensorConfigSettings", loggerId],
       });
-
-      options?.onSuccess?.(...args);
     },
   });
 }
+
+
