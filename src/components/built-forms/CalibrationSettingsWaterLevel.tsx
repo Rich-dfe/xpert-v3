@@ -51,6 +51,7 @@ export default function CalibrationSettingsWaterLevel() {
 
   useEffect(() => {
     if (calibrationData !== undefined) {
+      console.log('DB SETTINGS',calibrationData);
       if (calibrationData?.typeId === 4131) {
         form.reset({
           firstReadingReference: calibrationData.firstReadingReference,
