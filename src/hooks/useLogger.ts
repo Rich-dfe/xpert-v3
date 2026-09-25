@@ -55,16 +55,17 @@ export function useListLoggersByCustomerUserGroup(
 export function useUpdateLoggerConfigSettings(options?: any) {
   const { data: session } = useSession();
   const idToken = session?.idToken;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ data }: { data: UpdateLoggerConfigSettingsPayload }) =>
       loggerService.client.updateLoggerConfigSettings(data, idToken),
 
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries({
-    //     queryKey: ["groupLoggers"],
-    //   });
-    // },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["configSettings", variables.data.loggerId],
+      });
+    },
 
     ...options,
   });

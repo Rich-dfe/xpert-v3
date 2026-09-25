@@ -3,7 +3,7 @@ import { apiFetch } from "./client";
 import { serverFetch } from "./server";
 import { LoggerListSelect } from "@/types/logger";
 import { UpdateLoggerConfigSettingsPayload, LoggerConfigSettingsResponse, UpdateSensorConfigSettingsPayload, SensorConfigSettingsResponse } from "@/types/logger";
-import { LoggerCalibrationSettingsResponse, WaterlevelCalibrationSettings } from "@/types/calibration";
+import { LoggerCalibrationSettingsResponse, WaterlevelCalibrationSettings, UpdateParCalibrationSettingsPayload, ParCalibrationSettings } from "@/types/calibration";
 
 export const loggerService = {
     server:{
@@ -34,5 +34,8 @@ export const loggerService = {
 
       updateWaterLevelCalibrationSettings: (payload: WaterlevelCalibrationSettings, idToken?:string) =>
         apiFetch<WaterlevelCalibrationSettings[]>(`/loggers/calibration`,{method: "PATCH", body: JSON.stringify(payload),},idToken),
+
+      updateParCalibrationSettings: (payload: UpdateParCalibrationSettingsPayload, idToken?:string) =>
+        apiFetch<ParCalibrationSettings[]>(`/loggers/calibration`,{method: "PATCH", body: JSON.stringify(payload),},idToken),
     }   
 }

@@ -23,6 +23,13 @@ export const calibrationSettingsWaterLevelSchema = z.object({
   serverSideCalFlag: z.boolean(),  
 });
 
-export type CalibrationSettingsWaterLevelValues = z.infer<
-  typeof calibrationSettingsWaterLevelSchema
->;
+export const calibrationSettingsParSchema = z.object({
+  loggerReadingTotal:z.number().min(100, "Invalid value").max(100000000,"Exceeds maximum allowed value."), //based on 65535 per minute over 24 hours 
+  refReadingAverage:z.number().min(0, "No less than zero please").max(100000000, "Exceeds maximum allowed value."), //based maximum-intensity, direct midday sunlight over a day
+  testDuration: z.number().min(0.1,"A suitable test duration is required").max(2880,"Excceds maximum allowed value"), //based on a duration of two days
+  units: z.string(),
+  reset: z.boolean(),
+});
+
+export type CalibrationSettingsWaterLevelTypes = z.infer<typeof calibrationSettingsWaterLevelSchema>;
+export type CalibrationSettingsParTypes = z.infer<typeof calibrationSettingsParSchema>

@@ -11,6 +11,7 @@ import {
   FileOutput,
   ShieldCog,
   Blend,
+  SlidersVertical,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,6 +52,11 @@ const items = [
     title: "Config",
     url: "/dashboard/loggers/settings/config",
     icon: Settings,
+  },
+  {
+    title: "Calibration",
+    url: "/dashboard/loggers/settings/calibration",
+    icon: SlidersVertical,
   },
   {
     title: "Charts",
@@ -115,6 +121,7 @@ const SidebarClient = ({ user, customers }: SidebarClientProps) => {
     setSelectedLoggerId,
     selectedLoggerUid,
     setSelectedLoggerUid,
+    setLoggerTypeId
   } = useApplicationContext();
 
   const effectiveCustomerId = isSuperOrAdmin(user)
@@ -225,6 +232,7 @@ const SidebarClient = ({ user, customers }: SidebarClientProps) => {
 
     setSelectedLoggerId(e.target.value);
     setSelectedLoggerUid(selectedLogger?.loggerUid ?? null);
+    setLoggerTypeId(selectedLogger?.typeId!);
   };
 
   // Determine the unified loading state based on which query is active

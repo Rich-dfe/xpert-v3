@@ -5,6 +5,7 @@ export interface LoggerListSelect {
     loggerName: string | null;
     productId: number;
     loggerUid: number | null;
+    typeId:number;
 }
 
 export type UpdateLoggerConfigSettingsPayload =

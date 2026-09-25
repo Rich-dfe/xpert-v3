@@ -32,7 +32,6 @@ export default function LoggerConfigSettingsForm() {
     selectedGroupId,
     loggerSettingsVersion,
     setLoggerSettingsVersion,
-    setLoggerTypeId,
   } = useApplicationContext();
   const {
     mutate,
@@ -106,9 +105,7 @@ export default function LoggerConfigSettingsForm() {
   const continuousLoggingState = form.watch("continuousLogging");
   const loggingIntervalValue = form.watch("loggingInterval");
   const continuousLoggingAllowed = loggingIntervalValue >= 60;
-  const typeId = fetchData?.[0]?.typeId;
   
-
   // useEffect(() => {
   //   if (fetchData) {
   //     console.log("Fetched config data", fetchData);
@@ -122,7 +119,6 @@ export default function LoggerConfigSettingsForm() {
       //Set the version number in the application context
       setLoggerSettingsVersion(data.loggerSettingsVersion);
       //Set the sensor typeId in the application context
-      setLoggerTypeId(data.typeId);
 
       form.reset({
         continuousLogging: data.stopDate === 0,

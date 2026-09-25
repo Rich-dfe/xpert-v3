@@ -2,7 +2,7 @@
 import { useApplicationContext } from "@/context/ApplicationContext";
 import {
   calibrationSettingsWaterLevelSchema,
-  CalibrationSettingsWaterLevelValues,
+  CalibrationSettingsWaterLevelTypes,
 } from "@/schemas/calibrationSettingsSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import {
   useFetchLoggerCalibrationSettings,
-  useUpdateLoggerCalibrationSettings,
+  useUpdateWaterLevelLoggerCalibrationSettings,
 } from "@/hooks/useCalibrationSettings";
 import { useEffect } from "react";
 import { UpdateWaterlevelCalibrationSettingsPayload } from "@/types/calibration";
@@ -20,7 +20,7 @@ import { UpdateWaterlevelCalibrationSettingsPayload } from "@/types/calibration"
 export default function CalibrationSettingsWaterLevel() {
   const { selectedLoggerId, loggerTypeId, selectedLoggerUid } = useApplicationContext();
 
-  const form = useForm<CalibrationSettingsWaterLevelValues>({
+  const form = useForm<CalibrationSettingsWaterLevelTypes>({
     resolver: zodResolver(calibrationSettingsWaterLevelSchema),
 
     defaultValues: {
@@ -47,7 +47,9 @@ export default function CalibrationSettingsWaterLevel() {
     isSuccess: isUpdateSuccess,
     isError: isUpdateError,
     error: updateError,
-  } = useUpdateLoggerCalibrationSettings(selectedLoggerId);
+  } = useUpdateWaterLevelLoggerCalibrationSettings(selectedLoggerId);
+
+  const isServerSideCalFlag = form.watch("serverSideCalFlag");
 
   useEffect(() => {
     if (calibrationData !== undefined) {
@@ -62,13 +64,14 @@ export default function CalibrationSettingsWaterLevel() {
           resolution: calibrationData.resolution,
           temperatureCompensation:
             Math.round(calibrationData.temperatureCompensation * 10000) / 10000,
+          serverSideCalFlag: calibrationData.serverSideCalFlag
         });
       }
       console.log("WATER CALIBRATION DATA", calibrationData);
     }
   }, [calibrationData, form]);
 
-  function onSubmit(values: CalibrationSettingsWaterLevelValues) {
+  function onSubmit(values: CalibrationSettingsWaterLevelTypes) {
     console.log("ON Submit", values);
 
         const payload: UpdateWaterlevelCalibrationSettingsPayload = {
@@ -103,9 +106,11 @@ export default function CalibrationSettingsWaterLevel() {
       className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
     >
       <h5 className="mt-4">Water Level Calibration</h5>
+      {selectedLoggerId} - {selectedLoggerUid} - {loggerTypeId}
+      <div></div>
       <div></div>
       <div>
-        <FormSwitch
+        {!isServerSideCalFlag?<FormSwitch
           name="serverSideCalFlag"
           label="Server Side Calibration"
           checked={form.watch("serverSideCalFlag")}
@@ -114,7 +119,8 @@ export default function CalibrationSettingsWaterLevel() {
           }
           checkedLabel="Server Side"
           uncheckedLabel="Device Side"
-        />
+        /> : "Server Side"
+        }
       </div>
       <div></div>
       <div className="w-64">
