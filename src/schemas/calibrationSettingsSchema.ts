@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { boolean, z } from "zod";
 
 export const calibrationSettingsWaterLevelSchema = z.object({
   firstReadingReference: z
@@ -10,7 +10,7 @@ export const calibrationSettingsWaterLevelSchema = z.object({
     .min(100, "No less than 100 please")
     .max(5000, "No more than 5000 please"),
 
-  firstReadingLogger: z.number().min(1000).max(10000),
+  firstReadingLogger: z.number().min(1000).max(65535),
 
   secondReadingLogger: z.number().min(1000).max(65535),
 
@@ -21,6 +21,7 @@ export const calibrationSettingsWaterLevelSchema = z.object({
   resolution: z.number(),
   temperatureCompensation: z.number(),
   serverSideCalFlag: z.boolean(),  
+  reset: z.boolean()
 });
 
 export const calibrationSettingsParSchema = z.object({

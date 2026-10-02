@@ -34,11 +34,11 @@ export function useUpdateWaterLevelLoggerCalibrationSettings(loggerId: string) {
     mutationFn: ({ data }: { data: WaterlevelCalibrationSettings }) =>
       loggerService.client.updateWaterLevelCalibrationSettings(data, idToken),
    
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries({
-    //     queryKey: ["sensorConfigSettings", loggerId],
-    //   });
-    // },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["calibrationSettings", loggerId],
+      });
+    },
   });
 }
 

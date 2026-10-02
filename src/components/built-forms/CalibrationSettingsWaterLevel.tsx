@@ -32,6 +32,7 @@ export default function CalibrationSettingsWaterLevel() {
       temperature: 20,
       resolution: 0,
       temperatureCompensation: 0,
+      reset:false,
     },
   });
 
@@ -49,7 +50,10 @@ export default function CalibrationSettingsWaterLevel() {
     error: updateError,
   } = useUpdateWaterLevelLoggerCalibrationSettings(selectedLoggerId);
 
-  const isServerSideCalFlag = form.watch("serverSideCalFlag");
+  //const isServerSideCalFlag = form.watch("serverSideCalFlag");
+  //Checks whether the server side flag is set on the server to hide the swith component 
+  const isServerSideCalAlreadyEnabled = calibrationData?.typeId === 4131 && calibrationData.serverSideCalFlag;
+
 
   useEffect(() => {
     if (calibrationData !== undefined) {
@@ -64,7 +68,8 @@ export default function CalibrationSettingsWaterLevel() {
           resolution: calibrationData.resolution,
           temperatureCompensation:
             Math.round(calibrationData.temperatureCompensation * 10000) / 10000,
-          serverSideCalFlag: calibrationData.serverSideCalFlag
+          serverSideCalFlag: calibrationData.serverSideCalFlag,
+          reset:false
         });
       }
       console.log("WATER CALIBRATION DATA", calibrationData);
@@ -87,6 +92,7 @@ export default function CalibrationSettingsWaterLevel() {
           { data: payload },
           {
             onSuccess: () => {
+              form.setValue("reset", false);
               toast.success("Sensor configuration saved successfully!");
             },
             onError: (error) => {
@@ -107,10 +113,21 @@ export default function CalibrationSettingsWaterLevel() {
     >
       <h5 className="mt-4">Water Level Calibration</h5>
       {selectedLoggerId} - {selectedLoggerUid} - {loggerTypeId}
-      <div></div>
+      <div>
+        <FormSwitch
+          name="reset"
+          label="Reset To Defaults"
+          checked={form.watch("reset")}
+          onCheckedChange={(value) =>
+            form.setValue("reset", value)
+          }
+          checkedLabel="Press Save"
+          uncheckedLabel=""
+        />
+      </div>
       <div></div>
       <div>
-        {!isServerSideCalFlag?<FormSwitch
+        {!isServerSideCalAlreadyEnabled?<FormSwitch
           name="serverSideCalFlag"
           label="Server Side Calibration"
           checked={form.watch("serverSideCalFlag")}
@@ -119,7 +136,7 @@ export default function CalibrationSettingsWaterLevel() {
           }
           checkedLabel="Server Side"
           uncheckedLabel="Device Side"
-        /> : "Server Side"
+        /> : "Server Side Calibration Enabled"
         }
       </div>
       <div></div>

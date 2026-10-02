@@ -9,6 +9,7 @@
   resolution: number;
   temperatureCompensation: number;
   serverSideCalFlag: boolean;
+  reset:boolean;
 }
 
 export interface UpdateWaterlevelCalibrationSettingsPayload {
@@ -23,6 +24,7 @@ export interface UpdateWaterlevelCalibrationSettingsPayload {
   resolution: number;
   temperatureCompensation: number;
   serverSideCalFlag: boolean;
+  reset:boolean;
 }
 
 export interface ParCalibrationSettings {
