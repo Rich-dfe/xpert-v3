@@ -47,9 +47,10 @@ export function FormNumberField<T extends FieldValues>({
                 type="number"
                 step={step}
                 value={field.value ?? ""}
-                onChange={(e) =>
-                  field.onChange(Number(e.target.value))
-                }
+                onChange={(e) => {
+                const raw = e.target.value;
+                field.onChange(raw === "" ? null : e.target.valueAsNumber);
+                }}
                 onBlur={field.onBlur}
                 disabled={disabled}
                 placeholder={placeholder}

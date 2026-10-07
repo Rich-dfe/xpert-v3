@@ -2,7 +2,9 @@ import { boolean, z } from "zod";
 
 export const calibrationSettingsWaterLevelSchema = z.object({
   firstReadingReference: z
-    .number()
+    .number({error: (issue) => issue.input === undefined 
+      ? "Value is required." 
+      : "Must be a number."})
     .min(100, "No less than 100 please")
     .max(5000, "No more than 5000 please"),
   secondReadingReference: z
@@ -10,13 +12,13 @@ export const calibrationSettingsWaterLevelSchema = z.object({
     .min(100, "No less than 100 please")
     .max(5000, "No more than 5000 please"),
 
-  firstReadingLogger: z.number().min(1000).max(65535),
+  firstReadingLogger: z.number().min(1000).max(60000),
 
-  secondReadingLogger: z.number().min(1000).max(65535),
+  secondReadingLogger: z.number().min(1000).max(60000),
 
   temperature: z
     .number()
-    .min(0, "No less that zero please")
+    .min(1, "No less that one please")
     .max(99.99, "No more than 99 please"),
   resolution: z.number(),
   temperatureCompensation: z.number(),
@@ -32,5 +34,24 @@ export const calibrationSettingsParSchema = z.object({
   reset: z.boolean(),
 });
 
+//Defines one MPT sensor characteristics
+export const calibrationSettingsMptSenorSchema = z.object({
+  soilType:z.string(),
+  dryPoint:z.number(),
+  fieldCapacity:z.number(),
+  wiltPoint:z.number(),
+  saturatedSoilWeight:z.number(),
+  drySoilWeight:z.number(),
+  saturatedVolume:z.number(),
+  slope:z.number(),
+  offset:z.number()
+});
+
+//Defines an array of sensor characteristics that can have a variable length ie. 3 sensors or 5 sensors
+export const calibrationSettingsMptProbeSchema = z.object({
+  sensors:z.array(calibrationSettingsMptSenorSchema)
+});
+
 export type CalibrationSettingsWaterLevelTypes = z.infer<typeof calibrationSettingsWaterLevelSchema>;
-export type CalibrationSettingsParTypes = z.infer<typeof calibrationSettingsParSchema>
+export type CalibrationSettingsParTypes = z.infer<typeof calibrationSettingsParSchema>;
+export type CalibrationMptSensor = z.infer<typeof calibrationSettingsMptProbeSchema>;
