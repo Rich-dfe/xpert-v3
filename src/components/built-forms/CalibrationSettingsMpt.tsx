@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApplicationContext } from "@/context/ApplicationContext";
 import {
   CalibrationMptSensor,
@@ -10,74 +10,82 @@ import { useFieldArray, useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormSelect } from "../forms/FormSelect";
 import { FormNumberField } from "../forms/FormNumberField";
+import { FormSwitch } from "../forms/FormSwitch";
+import { Separator } from "../ui/separator";
 
 export default function CalibrationSettingsMpt() {
+  // ---------------------------------------------------------------------------
+  // Context
+  // ---------------------------------------------------------------------------
   const { selectedLoggerId, loggerTypeId, selectedLoggerUid } =
     useApplicationContext();
-
-  // Currently selected sensor
+  // ---------------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------------
   const [selectedSensor, setSelectedSensor] = useState("0");
-
+  const [calibrationType, setCalibrationType] = useState(false);
+  const [calculationMethod, setCalculationMethod] = useState(false);
+  // ---------------------------------------------------------------------------
+  // Constants
+  // ---------------------------------------------------------------------------
+  // Currently selected sensor
+  const formState = getFormState(calibrationType, calculationMethod);
   const soilTypeDefaults: Record<
     string,
     {
       dryPoint: number;
       fieldCapacity: number;
+      wiltPoint:number;
     }
   > = {
     "1": {
-      dryPoint: 10,
-      fieldCapacity: 25,
+      dryPoint: 2200, fieldCapacity: 6100, wiltPoint: 50
     },
     "2": {
-      dryPoint: 12,
-      fieldCapacity: 30,
+      dryPoint: 2104, fieldCapacity: 6265, wiltPoint: 42
     },
     "3": {
-      dryPoint: 15,
-      fieldCapacity: 35,
+      dryPoint: 2004, fieldCapacity: 6465, wiltPoint: 44
     },
     "4": {
-      dryPoint: 18,
-      fieldCapacity: 40,
+      dryPoint: 1858, fieldCapacity: 6730, wiltPoint: 50
     },
     "5": {
-      dryPoint: 20,
-      fieldCapacity: 45,
+      dryPoint: 1664, fieldCapacity: 6998, wiltPoint: 35
     },
     "6": {
-      dryPoint: 22,
-      fieldCapacity: 48,
+      dryPoint: 1700, fieldCapacity: 7100, wiltPoint: 20
     },
     "7": {
-      dryPoint: 17,
-      fieldCapacity: 38,
+      dryPoint: 1948, fieldCapacity: 6538, wiltPoint: 63
     },
     "8": {
-      dryPoint: 21,
-      fieldCapacity: 43,
+      dryPoint: 1801, fieldCapacity: 6810, wiltPoint: 61
     },
     "9": {
-      dryPoint: 23,
-      fieldCapacity: 46,
+      dryPoint: 1677, fieldCapacity: 7053, wiltPoint: 58
     },
     "10": {
-      dryPoint: 25,
-      fieldCapacity: 50,
+      dryPoint: 1638, fieldCapacity: 7099, wiltPoint: 66
     },
     "11": {
-      dryPoint: 22,
-      fieldCapacity: 44,
+      dryPoint: 1872, fieldCapacity: 6643, wiltPoint: 69
     },
     "12": {
-      dryPoint: 27,
-      fieldCapacity: 52,
+      dryPoint: 1490, fieldCapacity: 7250, wiltPoint: 71
+    },
+    "13": {
+      dryPoint: 1, fieldCapacity: 10000, wiltPoint: 20
+    },
+    "14": {
+      dryPoint: 1, fieldCapacity: 10000, wiltPoint: 0
     },
   };
 
   const form = useForm<CalibrationMptSensor>({
     resolver: zodResolver(calibrationSettingsMptProbeSchema),
     defaultValues: {
+      units: "1",
       sensors: [
         {
           soilType: "0",
@@ -143,51 +151,50 @@ export default function CalibrationSettingsMpt() {
     name: "sensors",
   });
 
+  // ---------------------------------------------------------------------------
+  // Derived Values
+  // ---------------------------------------------------------------------------
+  // Convert the selected sensor from string to array index
+  const sensorIndex = Number(selectedSensor);
+  const currentSoilType = form.watch(`sensors.${sensorIndex}.soilType`);
+
+  // ---------------------------------------------------------------------------
+  // Event Handlers
+  // ---------------------------------------------------------------------------
   function onSubmit() {
     console.log("SUBMITTED");
   }
 
-  // Convert the selected sensor from string to array index
-  const sensorIndex = Number(selectedSensor);
-
-  const currentSoilType = form.watch(`sensors.${sensorIndex}.soilType`);
-
   function handleSoilTypeChange(value: string) {
-    form.setValue(`sensors.${sensorIndex}.soilType`, value);
-
     const defaults = soilTypeDefaults[value];
 
     if (!defaults) {
       return;
     }
 
-    const { dryPoint, fieldCapacity } = defaults;
+    const { dryPoint, fieldCapacity, wiltPoint } = defaults;
 
-    form.setValue(`sensors.${sensorIndex}.dryPoint`, defaults.dryPoint);
-
-    form.setValue(
-      `sensors.${sensorIndex}.fieldCapacity`,
-      defaults.fieldCapacity,
+    const { slope, offset } = calculateCalibrationValues(
+      dryPoint,
+      fieldCapacity,
     );
 
-    //Calculate the slope and offet values
-    const calculated = calculateCalibrationValues(
-    dryPoint,
-    fieldCapacity
-  );
+    const sensor = form.getValues(`sensors.${sensorIndex}`);
 
-  //Populate the slope and offset values
-  form.setValue(
-    `sensors.${sensorIndex}.slope`,
-    calculated.slope
-  );
-
-  form.setValue(
-    `sensors.${sensorIndex}.offset`,
-    calculated.offset
-  );
+    form.setValue(`sensors.${sensorIndex}`, {
+      ...sensor,
+      soilType: value,
+      dryPoint,
+      fieldCapacity,
+      wiltPoint,
+      slope,
+      offset,
+    });
   }
 
+  // ---------------------------------------------------------------------------
+  // Helper Functions
+  // ---------------------------------------------------------------------------
   function calculateCalibrationValues(dryPoint: number, fieldCapacity: number) {
     return {
       slope: dryPoint * 2,
@@ -195,6 +202,46 @@ export default function CalibrationSettingsMpt() {
     };
   }
 
+  function getFormState(calibrationType: boolean, calculationMethod: boolean) {
+    if (!calibrationType && !calculationMethod) {
+      return {
+        soilFieldDisabled: true,
+        slopeOffsetFieldDisabled: true,
+      };
+    }
+
+    if (!calibrationType && calculationMethod) {
+      return {
+        soilFieldDisabled: true,
+        slopeOffsetFieldDisabled: false,
+      };
+    }
+
+    if (calibrationType && !calculationMethod) {
+      return {
+        soilFieldDisabled: false,
+        slopeOffsetFieldDisabled: true,
+      };
+    }
+
+    return {
+      soilFieldDisabled: true,
+      slopeOffsetFieldDisabled: false,
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Effects
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!calibrationType) {
+      form.setValue("units", "0");
+    }
+  }, [calibrationType, form]);
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit, (errors) => {
@@ -212,7 +259,7 @@ export default function CalibrationSettingsMpt() {
       </div>
 
       {/* Sensor selector */}
-      <div className="max-w-xs">
+      <div className="col-span-12 md:col-span-3">
         <FormSelect
           name="sensorSelector"
           label="Sensor"
@@ -227,7 +274,46 @@ export default function CalibrationSettingsMpt() {
           onValueChange={(value) => setSelectedSensor(value)}
         />
       </div>
-
+      <div className="col-span-12 md:col-span-3">
+        <FormSwitch
+          name="calType"
+          label="Calibration Type"
+          checked={calibrationType}
+          onCheckedChange={setCalibrationType}
+          checkedLabel="Volumetric"
+          uncheckedLabel="% of Saturation"
+        />
+      </div>
+      <div className="col-span-12 md:col-span-3">
+        <FormSwitch
+          name="calcMethod"
+          label="Calculation Method"
+          checked={calculationMethod}
+          onCheckedChange={setCalculationMethod}
+          checkedLabel="User Defined"
+          uncheckedLabel="Calculated"
+        />
+      </div>
+      <div className="col-span-12 md:col-span-3">
+        <Controller
+          control={form.control}
+          name="units"
+          render={({ field }) => (
+            <FormSelect
+              name={field.name}
+              label="Units"
+              options={[
+                { value: "0", label: "%" },
+                { value: "1", label: "mm" },
+              ]}
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={!calibrationType}
+            />
+          )}
+        />
+      </div>
+      <Separator />
       {/* Currently selected sensor */}
       {fields[sensorIndex] && (
         <div
@@ -302,6 +388,7 @@ export default function CalibrationSettingsMpt() {
               label="Saturated Soil Weight"
               control={form.control}
               placeholder="Enter Value"
+              disabled={formState.soilFieldDisabled}
             />
           </div>
 
@@ -311,6 +398,7 @@ export default function CalibrationSettingsMpt() {
               label="Dry Soil Weight"
               control={form.control}
               placeholder="Enter Value"
+              disabled={formState.soilFieldDisabled}
             />
           </div>
 
@@ -320,6 +408,7 @@ export default function CalibrationSettingsMpt() {
               label="Saturated Volume"
               control={form.control}
               placeholder="Enter Value"
+              disabled={formState.soilFieldDisabled}
             />
           </div>
 
@@ -330,6 +419,7 @@ export default function CalibrationSettingsMpt() {
               label="Slope"
               control={form.control}
               placeholder="Enter Value"
+              disabled={formState.slopeOffsetFieldDisabled}
             />
           </div>
 
@@ -339,6 +429,7 @@ export default function CalibrationSettingsMpt() {
               label="Offset"
               control={form.control}
               placeholder="Enter Value"
+              disabled={formState.slopeOffsetFieldDisabled}
             />
           </div>
         </div>
