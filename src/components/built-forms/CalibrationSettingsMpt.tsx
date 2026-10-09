@@ -6,7 +6,7 @@ import {
   CalibrationMptSensor,
   calibrationSettingsMptProbeSchema,
 } from "@/schemas/calibrationSettingsSchema";
-import { useFieldArray, useForm, Controller } from "react-hook-form";
+import { useFieldArray, useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormSelect } from "../forms/FormSelect";
 import { FormNumberField } from "../forms/FormNumberField";
@@ -156,8 +156,7 @@ export default function CalibrationSettingsMpt() {
   // ---------------------------------------------------------------------------
   // Convert the selected sensor from string to array index
   const sensorIndex = Number(selectedSensor);
-  const currentSoilType = form.watch(`sensors.${sensorIndex}.soilType`);
-
+  const currentSoilType = useWatch({control: form.control, name:`sensors.${sensorIndex}.soilType`});
   // ---------------------------------------------------------------------------
   // Event Handlers
   // ---------------------------------------------------------------------------
@@ -196,9 +195,11 @@ export default function CalibrationSettingsMpt() {
   // Helper Functions
   // ---------------------------------------------------------------------------
   function calculateCalibrationValues(dryPoint: number, fieldCapacity: number) {
+    const slope = (100 / ((dryPoint/100)-(fieldCapacity/100)));
+    const offset = 0 - slope * (dryPoint/100 / 100);
     return {
-      slope: dryPoint * 2,
-      offset: fieldCapacity * 2,
+      slope: Number(slope.toFixed(4)),
+      offset: Number(offset.toFixed(4)),
     };
   }
 
@@ -206,6 +207,7 @@ export default function CalibrationSettingsMpt() {
     if (!calibrationType && !calculationMethod) {
       return {
         soilFieldDisabled: true,
+        dryPointFcFieldsDisabled: true,
         slopeOffsetFieldDisabled: true,
       };
     }
@@ -213,6 +215,7 @@ export default function CalibrationSettingsMpt() {
     if (!calibrationType && calculationMethod) {
       return {
         soilFieldDisabled: true,
+        dryPointFcFieldsDisabled: false,
         slopeOffsetFieldDisabled: false,
       };
     }
@@ -220,12 +223,14 @@ export default function CalibrationSettingsMpt() {
     if (calibrationType && !calculationMethod) {
       return {
         soilFieldDisabled: false,
+        dryPointFcFieldsDisabled: false,
         slopeOffsetFieldDisabled: true,
       };
     }
 
     return {
       soilFieldDisabled: true,
+      dryPointFcFieldsDisabled: false,
       slopeOffsetFieldDisabled: false,
     };
   }
@@ -243,58 +248,54 @@ export default function CalibrationSettingsMpt() {
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit, (errors) => {
-        console.log("Validation errors:", errors);
-      })}
-      className="space-y-8"
-    >
-      {/* Header */}
-      <div>
-        <h5>Moisture Calibration</h5>
-      </div>
+  <form
+    onSubmit={form.handleSubmit(onSubmit, (errors) => {
+      console.log("Validation errors:", errors);
+    })}
+    className="mx-auto w-full max-w-6xl space-y-4 pb-4"
+  >
+    {/* Header and Logger Information */}
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h2 className="text-xl font-semibold tracking-tight">
+        Moisture Calibration
+      </h2>
 
-      <div>
-        {selectedLoggerId} - {selectedLoggerUid} - {loggerTypeId}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <span>
+          Logger ID: <strong className="font-medium text-foreground">{selectedLoggerId}</strong>
+        </span>
+        <span>
+          UID: <strong className="font-medium text-foreground">{selectedLoggerUid}</strong>
+        </span>
+        <span>
+          Type: <strong className="font-medium text-foreground">{loggerTypeId}</strong>
+        </span>
       </div>
+    </div>
 
-      {/* Sensor selector */}
-      <div className="col-span-12 md:col-span-3">
-        <FormSelect
-          name="sensorSelector"
-          label="Sensor"
-          options={[
-            { value: "0", label: "Sensor 1" },
-            { value: "1", label: "Sensor 2" },
-            { value: "2", label: "Sensor 3" },
-            { value: "3", label: "Sensor 4" },
-            { value: "4", label: "Sensor 5" },
-          ]}
-          value={selectedSensor}
-          onValueChange={(value) => setSelectedSensor(value)}
-        />
-      </div>
-      <div className="col-span-12 md:col-span-3">
-        <FormSwitch
-          name="calType"
-          label="Calibration Type"
-          checked={calibrationType}
-          onCheckedChange={setCalibrationType}
-          checkedLabel="Volumetric"
-          uncheckedLabel="% of Saturation"
-        />
-      </div>
-      <div className="col-span-12 md:col-span-3">
-        <FormSwitch
-          name="calcMethod"
-          label="Calculation Method"
-          checked={calculationMethod}
-          onCheckedChange={setCalculationMethod}
-          checkedLabel="User Defined"
-          uncheckedLabel="Calculated"
-        />
-      </div>
-      <div className="col-span-12 md:col-span-3">
+    {/* Calibration Settings */}
+    <section className="rounded-lg border bg-card p-4 space-y-4">
+      <h3 className="text-sm font-semibold">Calibration Settings</h3>
+
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
+        {/* Sensor */}
+        <div className="md:col-span-2">
+          <FormSelect
+            name="sensorSelector"
+            label="Sensor"
+            options={[
+              { value: "0", label: "Sensor 1" },
+              { value: "1", label: "Sensor 2" },
+              { value: "2", label: "Sensor 3" },
+              { value: "3", label: "Sensor 4" },
+              { value: "4", label: "Sensor 5" },
+            ]}
+            value={selectedSensor}
+            onValueChange={setSelectedSensor}
+          />
+        </div>
+
+        {/* Units */}
         <Controller
           control={form.control}
           name="units"
@@ -313,15 +314,39 @@ export default function CalibrationSettingsMpt() {
           )}
         />
       </div>
-      <Separator />
-      {/* Currently selected sensor */}
-      {fields[sensorIndex] && (
-        <div
+
+      <div className="grid grid-cols-1 gap-4 border-t pt-4 md:grid-cols-2">
+        <FormSwitch
+          name="calType"
+          label="Calibration Type"
+          checked={calibrationType}
+          onCheckedChange={setCalibrationType}
+          checkedLabel="Volumetric"
+          uncheckedLabel="% of Saturation"
+        />
+
+        <FormSwitch
+          name="calcMethod"
+          label="Calculation Method"
+          checked={calculationMethod}
+          onCheckedChange={setCalculationMethod}
+          checkedLabel="User Defined"
+          uncheckedLabel="Calculated"
+        />
+      </div>
+    </section>
+
+    {/* Selected Sensor Details */}
+    {fields[sensorIndex] && (
+      <div className="space-y-4">
+        {/* Soil Parameters */}
+        <section
           key={fields[sensorIndex].id}
-          className="grid grid-cols-12 gap-6 items-start"
+          className="rounded-lg border bg-card p-4 space-y-4"
         >
-          {/* Row 1 - 4 fields */}
-          <div className="col-span-12 md:col-span-3">
+          <h3 className="text-sm font-semibold">Soil Parameters</h3>
+
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Controller
               control={form.control}
               name={`sensors.${sensorIndex}.soilType`}
@@ -350,92 +375,92 @@ export default function CalibrationSettingsMpt() {
                 />
               )}
             />
-          </div>
 
-          <div className="col-span-12 md:col-span-3">
             <FormNumberField
               name={`sensors.${sensorIndex}.dryPoint`}
               label="Dry Point"
               control={form.control}
-              placeholder="Enter Value"
+              placeholder="Enter value"
               disabled={currentSoilType !== "13"}
             />
-          </div>
 
-          <div className="col-span-12 md:col-span-3">
             <FormNumberField
               name={`sensors.${sensorIndex}.fieldCapacity`}
               label="Field Capacity"
               control={form.control}
-              placeholder="Enter Value"
+              placeholder="Enter value"
               disabled={currentSoilType !== "13"}
             />
-          </div>
 
-          <div className="col-span-12 md:col-span-3">
             <FormNumberField
               name={`sensors.${sensorIndex}.wiltPoint`}
               label="Wilt Point"
               control={form.control}
-              placeholder="Enter Value"
+              placeholder="Enter value"
             />
           </div>
+        </section>
 
-          {/* Row 2 - 3 fields */}
-          <div className="col-span-12 md:col-span-4">
+        {/* Soil Measurements and Coefficients */}
+        <section className="rounded-lg border bg-card p-4 space-y-4">
+          <h3 className="text-sm font-semibold">
+            Measurements & Calibration Coefficients
+          </h3>
+
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <FormNumberField
               name={`sensors.${sensorIndex}.saturatedSoilWeight`}
               label="Saturated Soil Weight"
               control={form.control}
-              placeholder="Enter Value"
+              placeholder="Enter value"
               disabled={formState.soilFieldDisabled}
             />
-          </div>
 
-          <div className="col-span-12 md:col-span-4">
             <FormNumberField
               name={`sensors.${sensorIndex}.drySoilWeight`}
               label="Dry Soil Weight"
               control={form.control}
-              placeholder="Enter Value"
+              placeholder="Enter value"
               disabled={formState.soilFieldDisabled}
             />
-          </div>
 
-          <div className="col-span-12 md:col-span-4">
             <FormNumberField
               name={`sensors.${sensorIndex}.saturatedVolume`}
               label="Saturated Volume"
               control={form.control}
-              placeholder="Enter Value"
+              placeholder="Enter value"
               disabled={formState.soilFieldDisabled}
             />
-          </div>
 
-          {/* Row 3 - 2 fields */}
-          <div className="col-span-12 md:col-span-6">
             <FormNumberField
               name={`sensors.${sensorIndex}.slope`}
               label="Slope"
               control={form.control}
-              placeholder="Enter Value"
+              placeholder="Enter value"
               disabled={formState.slopeOffsetFieldDisabled}
             />
-          </div>
 
-          <div className="col-span-12 md:col-span-6">
             <FormNumberField
               name={`sensors.${sensorIndex}.offset`}
               label="Offset"
               control={form.control}
-              placeholder="Enter Value"
+              placeholder="Enter value"
               disabled={formState.slopeOffsetFieldDisabled}
             />
           </div>
-        </div>
-      )}
+        </section>
+      </div>
+    )}
 
-      <button type="submit">Save Calibration</button>
-    </form>
-  );
+    {/* Save */}
+    <div className="flex justify-end border-t pt-4">
+      <button
+        type="submit"
+        className="inline-flex w-full items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
+      >
+        Save Calibration
+      </button>
+    </div>
+  </form>
+);
 }

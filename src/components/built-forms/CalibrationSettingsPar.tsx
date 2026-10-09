@@ -124,85 +124,154 @@ export default function CalibrationSettingsPar() {
 };
 
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit, (errors) => {
-        console.log("Validation errors:", errors);
-      })}
-      className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
-    >
-        {selectedLoggerId} - {selectedLoggerUid} - {loggerTypeId}
-        <div></div>
-      <h5 className="mt-4">PAR Calibration {isFetchLoading?"Loading...":null}</h5>
-      <div></div>
-      <div>
-        <FormSwitch
-          name="reset"
-          label="Reset To Defaults"
-          checked={form.watch("reset")}
-          onCheckedChange={handleResetChange}
-          checkedLabel="Reset"
-          uncheckedLabel=""
-        />
+  <form
+    onSubmit={form.handleSubmit(onSubmit, (errors) => {
+      console.log("Validation errors:", errors);
+    })}
+    className="mx-auto w-full max-w-6xl space-y-4 pb-4"
+  >
+    {/* Header and Logger Information */}
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h2 className="text-xl font-semibold tracking-tight">
+        PAR Calibration
+        {isFetchLoading && (
+          <span className="ml-2 text-sm font-normal text-muted-foreground">
+            Loading...
+          </span>
+        )}
+      </h2>
+
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <span>
+          Logger ID:{" "}
+          <strong className="font-medium text-foreground">
+            {selectedLoggerId}
+          </strong>
+        </span>
+
+        <span>
+          UID:{" "}
+          <strong className="font-medium text-foreground">
+            {selectedLoggerUid}
+          </strong>
+        </span>
+
+        <span>
+          Type:{" "}
+          <strong className="font-medium text-foreground">
+            {loggerTypeId}
+          </strong>
+        </span>
       </div>
-      <div></div>
-      <div className="w-64">
+    </div>
+
+    {/* Calibration Settings */}
+    <section className="rounded-lg border bg-card p-4 space-y-4">
+      <h3 className="text-sm font-semibold">
+        Calibration Settings
+      </h3>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Reset to Defaults */}
+        <div className="min-w-0">
+          <FormSwitch
+            name="reset"
+            label="Reset To Defaults"
+            checked={form.watch("reset")}
+            onCheckedChange={handleResetChange}
+            checkedLabel="Reset"
+            uncheckedLabel=""
+          />
+        </div>
+
+        {/* Test Duration */}
+        <div className="min-w-0">
+          <FormNumberField
+            name="testDuration"
+            label="Test Duration (minutes)"
+            placeholder="Enter value"
+            control={form.control}
+            disabled={form.watch("reset")}
+            helpText={
+              form.watch("reset")
+                ? "Logger config interval"
+                : ""
+            }
+          />
+        </div>
+      </div>
+    </section>
+
+    {/* PAR Calibration Readings */}
+    <section className="rounded-lg border bg-card p-4 space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold">
+          PAR Calibration Readings
+        </h3>
+
+        <p className="mt-1 text-xs text-muted-foreground">
+          Enter the logger reading, reference reading, and measurement units.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Logger Reading */}
         <FormNumberField
           name="loggerReadingTotal"
           label="Logger Reading Total"
-          placeholder="Enter Value"
+          placeholder="Enter value"
           control={form.control}
           disabled={form.watch("reset")}
         />
-      </div>
-      <div className="w-64">
+
+        {/* Reference Reading */}
         <FormNumberField
           name="refReadingAverage"
           label="Reference Reading Average"
-          placeholder="Enter Value"
+          placeholder="Enter value"
           control={form.control}
           disabled={form.watch("reset")}
         />
-      </div>
-      <div className="md:col-span-2">
-        <FormSelect
-          name="units"
-          label="Units"
-          value={form.watch("units")}
-          onValueChange={(value) => form.setValue("units", value)}
-          //error={form.formState.errors.timezone?.message}
-          placeholder="Please Select"
-          options={[
-            {
-              value: "1",
-              label: "umol m-² s-¹",
-            },
-            {
-              value: "2",
-              label: "mmol m-² s-¹",
-            },
-            {
-              value: "3",
-              label: "W m-²",
-            },
-            {
-              value: "4",
-              label: "lux",
+
+        {/* Units */}
+        <div className="sm:col-span-2">
+          <FormSelect
+            name="units"
+            label="Units"
+            value={form.watch("units")}
+            onValueChange={(value) =>
+              form.setValue("units", value)
             }
-          ]}
-        />
+            placeholder="Please Select"
+            options={[
+              {
+                value: "1",
+                label: "umol m-² s-¹",
+              },
+              {
+                value: "2",
+                label: "mmol m-² s-¹",
+              },
+              {
+                value: "3",
+                label: "W m-²",
+              },
+              {
+                value: "4",
+                label: "lux",
+              },
+            ]}
+          />
+        </div>
       </div>
-      <div className="w-64">
-        <FormNumberField
-          name="testDuration"
-          label="Test Duration (minutes)"
-          placeholder="Enter Value"
-          control={form.control}
-          disabled={form.watch("reset")}
-          helpText={form.watch("reset")?"Logger config interval":""}
-        />
-      </div>
-      <div></div>
-      <Button type="submit">Save</Button>
-    </form>
-  );
+    </section>
+
+    {/* Save */}
+    <div className="flex justify-end border-t pt-4">
+      <Button type="submit" className="w-full sm:w-auto">
+        Save
+      </Button>
+    </div>
+  </form>
+);
 }

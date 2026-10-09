@@ -22,21 +22,25 @@ export function FormSwitch({
   uncheckedLabel,
 }: FormSwitchProps) {
   return (
-    <div className="flex items-center justify-between space-x-4">
-      <div>
-        <label htmlFor={name} className="text-sm font-medium">
-          {label}
-        </label>
+  <div className="flex items-center justify-start gap-3">
+    {/* Label */}
+    <div className="shrink-0">
+      <label htmlFor={name} className="text-sm font-medium">
+        {label}
+      </label>
 
-        {helpText && (
-          <p className="text-sm text-muted-foreground">{helpText}</p>
-        )}
-      </div>
+      {helpText && (
+        <p className="text-sm text-muted-foreground">
+          {helpText}
+        </p>
+      )}
+    </div>
 
-      <div className="flex items-center gap-3">
-        <span className="text-sm">
-          {checked ? checkedLabel : uncheckedLabel}
-        </span>
+    {/* Current Value and Switch */}
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-muted-foreground">
+        {checked ? checkedLabel : uncheckedLabel}
+      </span>
 
       <Switch
         id={name}
@@ -44,7 +48,7 @@ export function FormSwitch({
         onCheckedChange={onCheckedChange}
         disabled={disabled}
       />
-      </div>
     </div>
-  );
+  </div>
+);
 }
