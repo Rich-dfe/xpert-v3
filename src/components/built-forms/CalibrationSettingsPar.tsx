@@ -166,105 +166,85 @@ export default function CalibrationSettingsPar() {
     </div>
 
     {/* Calibration Settings */}
-    <section className="rounded-lg border bg-card p-4 space-y-4">
-      <h3 className="text-sm font-semibold">
-        Calibration Settings
-      </h3>
+<section className="rounded-lg border bg-card p-4 space-y-4">
+  <h3 className="text-sm font-semibold">
+    Calibration Settings
+  </h3>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Reset to Defaults */}
-        <div className="min-w-0">
-          <FormSwitch
-            name="reset"
-            label="Reset To Defaults"
-            checked={form.watch("reset")}
-            onCheckedChange={handleResetChange}
-            checkedLabel="Reset"
-            uncheckedLabel=""
-          />
-        </div>
+  <FormSwitch
+    name="reset"
+    label="Reset To Defaults"
+    checked={form.watch("reset")}
+    onCheckedChange={handleResetChange}
+    checkedLabel="Reset"
+    uncheckedLabel=""
+  />
+</section>
 
-        {/* Test Duration */}
-        <div className="min-w-0">
-          <FormNumberField
-            name="testDuration"
-            label="Test Duration (minutes)"
-            placeholder="Enter value"
-            control={form.control}
-            disabled={form.watch("reset")}
-            helpText={
-              form.watch("reset")
-                ? "Logger config interval"
-                : ""
-            }
-          />
-        </div>
-      </div>
-    </section>
+{/* PAR Calibration Readings */}
+<section className="rounded-lg border bg-card p-4 space-y-4">
+  <div>
+    <h3 className="text-sm font-semibold">
+      PAR Calibration Readings
+    </h3>
 
-    {/* PAR Calibration Readings */}
-    <section className="rounded-lg border bg-card p-4 space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold">
-          PAR Calibration Readings
-        </h3>
+    <p className="mt-1 text-xs text-muted-foreground">
+      Enter the logger reading, reference reading, and measurement units.
+    </p>
+  </div>
 
-        <p className="mt-1 text-xs text-muted-foreground">
-          Enter the logger reading, reference reading, and measurement units.
-        </p>
-      </div>
+  <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+    {/* First Row: Logger and Reference Readings */}
+    <FormNumberField
+      name="loggerReadingTotal"
+      label="Logger Reading Total"
+      placeholder="Enter value"
+      control={form.control}
+      disabled={form.watch("reset")}
+    />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {/* Logger Reading */}
-        <FormNumberField
-          name="loggerReadingTotal"
-          label="Logger Reading Total"
-          placeholder="Enter value"
-          control={form.control}
-          disabled={form.watch("reset")}
-        />
+    <FormNumberField
+      name="refReadingAverage"
+      label="Reference Reading Average"
+      placeholder="Enter value"
+      control={form.control}
+      disabled={form.watch("reset")}
+    />
 
-        {/* Reference Reading */}
-        <FormNumberField
-          name="refReadingAverage"
-          label="Reference Reading Average"
-          placeholder="Enter value"
-          control={form.control}
-          disabled={form.watch("reset")}
-        />
+    {/* Second Row: Test Duration under Logger Reading Total */}
+    <FormNumberField
+      name="testDuration"
+      label="Test Duration (minutes)"
+      placeholder="Enter value"
+      control={form.control}
+      disabled={form.watch("reset")}
+      helpText={
+        form.watch("reset")
+          ? "Logger config interval"
+          : ""
+      }
+    />
 
-        {/* Units */}
-        <div className="sm:col-span-2">
-          <FormSelect
-            name="units"
-            label="Units"
-            value={form.watch("units")}
-            onValueChange={(value) =>
-              form.setValue("units", value)
-            }
-            placeholder="Please Select"
-            options={[
-              {
-                value: "1",
-                label: "umol m-² s-¹",
-              },
-              {
-                value: "2",
-                label: "mmol m-² s-¹",
-              },
-              {
-                value: "3",
-                label: "W m-²",
-              },
-              {
-                value: "4",
-                label: "lux",
-              },
-            ]}
-          />
-        </div>
-      </div>
-    </section>
+    {/* Units on a Separate Full-Width Row */}
+    <div className="sm:col-span-2">
+      <FormSelect
+        name="units"
+        label="Units"
+        value={form.watch("units")}
+        onValueChange={(value) =>
+          form.setValue("units", value)
+        }
+        placeholder="Please Select"
+        options={[
+          { value: "1", label: "umol m-² s-¹" },
+          { value: "2", label: "mmol m-² s-¹" },
+          { value: "3", label: "W m-²" },
+          { value: "4", label: "lux" },
+        ]}
+      />
+    </div>
+  </div>
+</section>
 
     {/* Save */}
     <div className="flex justify-end border-t pt-4">
