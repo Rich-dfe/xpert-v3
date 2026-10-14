@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useApplicationContext } from "@/context/ApplicationContext";
 import {
-  CalibrationMptSensor,
+  CalibrationMptSensorTypes,
   calibrationSettingsMptProbeSchema,
 } from "@/schemas/calibrationSettingsSchema";
 import { useFieldArray, useForm, Controller, useWatch } from "react-hook-form";
@@ -12,6 +12,10 @@ import { FormSelect } from "../forms/FormSelect";
 import { FormNumberField } from "../forms/FormNumberField";
 import { FormSwitch } from "../forms/FormSwitch";
 import { Separator } from "../ui/separator";
+import {
+  useFetchLoggerCalibrationSettings,
+  useFetchMptLoggerCalibrationSettings,
+} from "@/hooks/useCalibrationSettings";
 
 export default function CalibrationSettingsMpt() {
   // ---------------------------------------------------------------------------
@@ -25,6 +29,15 @@ export default function CalibrationSettingsMpt() {
   const [selectedSensor, setSelectedSensor] = useState("0");
   const [calibrationType, setCalibrationType] = useState(false);
   const [calculationMethod, setCalculationMethod] = useState(false);
+  // ---------------------------------------------------------------------------
+  // Server API Requests
+  // ---------------------------------------------------------------------------
+  const {
+    data: calibrationData,
+    isLoading: isFetchLoading,
+    isError: isFetchError,
+    error: fetchError,
+  } = useFetchMptLoggerCalibrationSettings(selectedLoggerId, loggerTypeId);
   // ---------------------------------------------------------------------------
   // Constants
   // ---------------------------------------------------------------------------
@@ -110,7 +123,7 @@ export default function CalibrationSettingsMpt() {
     },
   };
 
-  const form = useForm<CalibrationMptSensor>({
+  const form = useForm<CalibrationMptSensorTypes>({
     resolver: zodResolver(calibrationSettingsMptProbeSchema),
     defaultValues: {
       units: "1",
@@ -212,8 +225,8 @@ export default function CalibrationSettingsMpt() {
   // ---------------------------------------------------------------------------
   // Event Handlers
   // ---------------------------------------------------------------------------
-  function onSubmit() {
-    console.log("SUBMITTED");
+  function onSubmit(values: CalibrationMptSensorTypes) {
+    console.log("SUBMITTED", values);
   }
 
   function handleSoilTypeChange(value: string) {
@@ -260,12 +273,12 @@ export default function CalibrationSettingsMpt() {
     const dryWeight = Number(drySoilWeightValue);
     const volume = Number(saturatedVolumeValue);
     const defaultSlope = 1.0001;
-    const defaultOffset = -0.0001
+    const defaultOffset = -0.0001;
 
-    const scale = (saturatedWeight-dryWeight)/volume;
+    const scale = (saturatedWeight - dryWeight) / volume;
     const slope = defaultSlope * scale;
     const offset = defaultOffset * scale;
-    
+
     return {
       slope: Number(slope.toFixed(4)),
       offset: Number(offset.toFixed(4)),
@@ -333,7 +346,6 @@ export default function CalibrationSettingsMpt() {
 
       const { slope, offset } = calculateUserDefinedCalibrationValues();
 
-
       form.setValue(`sensors.${sensorIndex}.slope`, slope, {
         shouldDirty: true,
       });
@@ -351,6 +363,28 @@ export default function CalibrationSettingsMpt() {
     sensorIndex,
     form,
   ]);
+
+  useEffect(() => {
+    if (calibrationData !== undefined) {
+      console.log("MPT CAL DATA", calibrationData);
+      const units = calibrationData[0]?.soil_moisture_units;
+      form.reset({
+        units: units === 0 || units === "0" ? "0" : "1",
+
+          sensors: calibrationData.map((sensor: any) => ({
+          soilType: String(sensor.soil_type_id ?? "0"),
+          dryPoint: sensor.dry_limit_line ?? 0,
+          fieldCapacity: sensor.fc_limit_line ?? 0,
+          wiltPoint: sensor.wilt_point ?? 0,
+          saturatedSoilWeight: sensor.sat_soil_weight ?? 0,
+          drySoilWeight: sensor.dry_soil_weight ?? 0,
+          saturatedVolume: sensor.sat_soil_volume ?? 0,
+          slope: sensor.slope ?? 0,
+          offset: sensor.offset ?? 0,
+        })),
+      });
+    }
+  }, [calibrationData, form]);
 
   // ---------------------------------------------------------------------------
   // Render
@@ -400,13 +434,10 @@ export default function CalibrationSettingsMpt() {
             <FormSelect
               name="sensorSelector"
               label="Sensor"
-              options={[
-                { value: "0", label: "Sensor 1" },
-                { value: "1", label: "Sensor 2" },
-                { value: "2", label: "Sensor 3" },
-                { value: "3", label: "Sensor 4" },
-                { value: "4", label: "Sensor 5" },
-              ]}
+              options={fields.map((_, index) => ({
+                value: String(index),
+                label: `Sensor ${index + 1}`,
+              }))}
               value={selectedSensor}
               onValueChange={setSelectedSensor}
             />

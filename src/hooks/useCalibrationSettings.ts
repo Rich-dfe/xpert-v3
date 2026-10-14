@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { loggerService } from "@/service/api/loggerService";
 import { useSession } from "next-auth/react";
-import { LoggerCalibrationSettingsResponse, WaterlevelCalibrationSettings, UpdateParCalibrationSettingsPayload } from "@/types/calibration";
+import { LoggerCalibrationSettingsResponse, WaterlevelCalibrationSettings, UpdateParCalibrationSettingsPayload, MptCalibrationSettingsResponse } from "@/types/calibration";
 
 export function useFetchLoggerCalibrationSettings(
   loggerId: string,
@@ -15,6 +15,28 @@ export function useFetchLoggerCalibrationSettings(
 
     queryFn: () =>
       loggerService.client.fetchLoggerCalibrationSettings(
+        loggerId,
+        typeId!,
+        idToken,
+      ),
+
+    enabled: !!loggerId && typeId !== null,
+  });
+}
+
+//Used when the calibration settings are retuned as an array like the MPT settings
+export function useFetchMptLoggerCalibrationSettings(
+  loggerId: string,
+  typeId: number | null,
+) {
+  const { data: session } = useSession();
+  const idToken = session?.idToken;
+
+  return useQuery<MptCalibrationSettingsResponse | undefined, Error>({
+    queryKey: ["calibrationSettings", loggerId],
+
+    queryFn: () =>
+      loggerService.client.fetchMptLoggerCalibrationSettings(
         loggerId,
         typeId!,
         idToken,

@@ -45,15 +45,14 @@ export const calibrationSettingsMptSenorSchema = z.object({
   saturatedVolume:z.number(),
   slope:z.number(),
   offset:z.number(),
-  units: z.enum(["0", "1"]),
 });
 
 //Defines an array of sensor characteristics that can have a variable length ie. 3 sensors or 5 sensors
 export const calibrationSettingsMptProbeSchema = z.object({
-  units: z.string(),
+  units: z.enum(["0", "1"]),
   sensors:z.array(calibrationSettingsMptSenorSchema)
 });
 
 export type CalibrationSettingsWaterLevelTypes = z.infer<typeof calibrationSettingsWaterLevelSchema>;
 export type CalibrationSettingsParTypes = z.infer<typeof calibrationSettingsParSchema>;
-export type CalibrationMptSensor = z.infer<typeof calibrationSettingsMptProbeSchema>;
+export type CalibrationMptSensorTypes = z.infer<typeof calibrationSettingsMptProbeSchema>;

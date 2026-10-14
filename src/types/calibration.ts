@@ -51,3 +51,18 @@ export interface UpdateParCalibrationSettingsPayload extends ParCalibrationSetti
 export type LoggerCalibrationSettingsResponse =
   | WaterlevelCalibrationSettings
   | ParCalibrationSettings;
+
+export type MptCalibrationSettingsRow = {
+  soil_moisture_units: number | string | null;
+  soil_type_id: number | null;
+  dry_limit_line: number | null;
+  fc_limit_line: number | null;
+  wilt_point: number | null;
+  sat_soil_weight: number | null;
+  dry_soil_weight: number | null;
+  sat_soil_volume: number | null;
+  slope: number | null;
+  offset: number | null;
+};
+
+export type MptCalibrationSettingsResponse = MptCalibrationSettingsRow[];
