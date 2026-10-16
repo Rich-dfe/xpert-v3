@@ -9,6 +9,7 @@ interface FormNumberFieldProps<T extends FieldValues> {
   control: Control<T>;
   unit?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   required?: boolean;
   placeholder?: string;
   step?: number;
@@ -21,6 +22,7 @@ export function FormNumberField<T extends FieldValues>({
   control,
   unit,
   disabled,
+  readOnly,
   required,
   placeholder,
   step,
@@ -53,6 +55,7 @@ export function FormNumberField<T extends FieldValues>({
                 }}
                 onBlur={field.onBlur}
                 disabled={disabled}
+                readOnly={readOnly}
                 placeholder={placeholder}
                 name={field.name}
                 ref={field.ref}

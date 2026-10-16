@@ -11,11 +11,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormSelect } from "../forms/FormSelect";
 import { FormNumberField } from "../forms/FormNumberField";
 import { FormSwitch } from "../forms/FormSwitch";
-import { Separator } from "../ui/separator";
 import {
-  useFetchLoggerCalibrationSettings,
   useFetchMptLoggerCalibrationSettings,
+  useUpdateMptCalibrationSettings
 } from "@/hooks/useCalibrationSettings";
+import { CalibrationMptPayload } from "@/types/calibration";
+import { toast } from "sonner";
 
 export default function CalibrationSettingsMpt() {
   // ---------------------------------------------------------------------------
@@ -27,8 +28,8 @@ export default function CalibrationSettingsMpt() {
   // State
   // ---------------------------------------------------------------------------
   const [selectedSensor, setSelectedSensor] = useState("0");
-  const [calibrationType, setCalibrationType] = useState(false);
-  const [calculationMethod, setCalculationMethod] = useState(false);
+  //const [calibrationType, setCalibrationType] = useState(false);
+  //const [calculationMethod, setCalculationMethod] = useState(false);
   // ---------------------------------------------------------------------------
   // Server API Requests
   // ---------------------------------------------------------------------------
@@ -38,11 +39,19 @@ export default function CalibrationSettingsMpt() {
     isError: isFetchError,
     error: fetchError,
   } = useFetchMptLoggerCalibrationSettings(selectedLoggerId, loggerTypeId);
+
+  const {
+      mutate,
+      isPending: isUpdatePending,
+      isSuccess: isUpdateSuccess,
+      isError: isUpdateError,
+      error: updateError,
+    } = useUpdateMptCalibrationSettings(selectedLoggerId);
   // ---------------------------------------------------------------------------
   // Constants
   // ---------------------------------------------------------------------------
   // Currently selected sensor
-  const formState = getFormState(calibrationType, calculationMethod);
+  //const formState = getFormState(calibrationType, calculationMethod);
   const soilTypeDefaults: Record<
     string,
     {
@@ -127,6 +136,8 @@ export default function CalibrationSettingsMpt() {
     resolver: zodResolver(calibrationSettingsMptProbeSchema),
     defaultValues: {
       units: "1",
+      calType: false,
+      calcMethod: false,
       sensors: [
         {
           soilType: "0",
@@ -187,6 +198,14 @@ export default function CalibrationSettingsMpt() {
     },
   });
 
+  const calibrationType = useWatch({ control: form.control, name: "calType" });
+  const calculationMethod = useWatch({
+    control: form.control,
+    name: "calcMethod",
+  });
+
+  const formState = getFormState(calibrationType, calculationMethod);
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "sensors",
@@ -226,7 +245,30 @@ export default function CalibrationSettingsMpt() {
   // Event Handlers
   // ---------------------------------------------------------------------------
   function onSubmit(values: CalibrationMptSensorTypes) {
-    console.log("SUBMITTED", values);
+    //console.log("SUBMITTED", values);
+
+    const payload: CalibrationMptPayload = {
+      ...values,
+      typeId: 4161,
+      loggerId: selectedLoggerId,
+      loggerUid: selectedLoggerUid,
+    };
+
+    console.log("PAYLOAD", payload);
+
+    mutate(
+          { data: payload },
+          {
+            onSuccess: () => {
+              toast.success("Sensor configuration saved successfully!");
+            },
+            onError: (error) => {
+              toast.error("Failed to save configuration", {
+                description: error?.message || "Please try again.",
+              });
+            },
+          },
+        );
   }
 
   function handleSoilTypeChange(value: string) {
@@ -368,10 +410,14 @@ export default function CalibrationSettingsMpt() {
     if (calibrationData !== undefined) {
       console.log("MPT CAL DATA", calibrationData);
       const units = calibrationData[0]?.soil_moisture_units;
+      const method = calibrationData[0]?.cal_method;
+      const type = calibrationData[0]?.cal_type;
       form.reset({
         units: units === 0 || units === "0" ? "0" : "1",
+        calcMethod: method === 0 || method === "0" ? false : true,
+        calType: type === 0 || type === "0" ? false : true,
 
-          sensors: calibrationData.map((sensor: any) => ({
+        sensors: calibrationData.map((sensor: any) => ({
           soilType: String(sensor.soil_type_id ?? "0"),
           dryPoint: sensor.dry_limit_line ?? 0,
           fieldCapacity: sensor.fc_limit_line ?? 0,
@@ -379,8 +425,8 @@ export default function CalibrationSettingsMpt() {
           saturatedSoilWeight: sensor.sat_soil_weight ?? 0,
           drySoilWeight: sensor.dry_soil_weight ?? 0,
           saturatedVolume: sensor.sat_soil_volume ?? 0,
-          slope: sensor.slope ?? 0,
-          offset: sensor.offset ?? 0,
+          slope: Number(sensor.slope ?? 0),
+          offset: Number(sensor.offset ?? 0),
         })),
       });
     }
@@ -464,23 +510,53 @@ export default function CalibrationSettingsMpt() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 border-t pt-4 md:grid-cols-2">
-          <FormSwitch
+          {/* <FormSwitch
             name="calType"
             label="Calibration Type"
             checked={calibrationType}
             onCheckedChange={setCalibrationType}
             checkedLabel="Volumetric"
             uncheckedLabel="% of Saturation"
+          /> */}
+
+          <Controller
+            control={form.control}
+            name="calType"
+            render={({ field }) => (
+              <FormSwitch
+                name={field.name}
+                label="Calibration Type"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                checkedLabel="Volumetric"
+                uncheckedLabel="% of Saturation"
+              />
+            )}
           />
 
-          <FormSwitch
+          <Controller
+            control={form.control}
+            name="calcMethod"
+            render={({ field }) => (
+              <FormSwitch
+                name={field.name}
+                label="Calculation Method"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                checkedLabel="User Defined"
+                uncheckedLabel="Calculated"
+              />
+            )}
+          />
+
+          {/* <FormSwitch
             name="calcMethod"
             label="Calculation Method"
             checked={calculationMethod}
             onCheckedChange={setCalculationMethod}
             checkedLabel="User Defined"
             uncheckedLabel="Calculated"
-          />
+          /> */}
         </div>
       </section>
 

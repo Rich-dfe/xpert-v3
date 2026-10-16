@@ -50,6 +50,8 @@ export const calibrationSettingsMptSenorSchema = z.object({
 //Defines an array of sensor characteristics that can have a variable length ie. 3 sensors or 5 sensors
 export const calibrationSettingsMptProbeSchema = z.object({
   units: z.enum(["0", "1"]),
+  calType: z.boolean(),
+  calcMethod: z.boolean(),
   sensors:z.array(calibrationSettingsMptSenorSchema)
 });
 

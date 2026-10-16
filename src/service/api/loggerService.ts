@@ -2,43 +2,137 @@ import { LoggerListProps } from "@/types";
 import { apiFetch } from "./client";
 import { serverFetch } from "./server";
 import { LoggerListSelect } from "@/types/logger";
-import { UpdateLoggerConfigSettingsPayload, LoggerConfigSettingsResponse, UpdateSensorConfigSettingsPayload, SensorConfigSettingsResponse } from "@/types/logger";
-import { LoggerCalibrationSettingsResponse, WaterlevelCalibrationSettings, UpdateParCalibrationSettingsPayload, ParCalibrationSettings, MptCalibrationSettingsResponse } from "@/types/calibration";
+import {
+  UpdateLoggerConfigSettingsPayload,
+  LoggerConfigSettingsResponse,
+  UpdateSensorConfigSettingsPayload,
+  SensorConfigSettingsResponse,
+} from "@/types/logger";
+import {
+  LoggerCalibrationSettingsResponse,
+  WaterlevelCalibrationSettings,
+  UpdateParCalibrationSettingsPayload,
+  ParCalibrationSettings,
+  MptCalibrationSettingsResponse,
+  CalibrationMptPayload
+} from "@/types/calibration";
 
 export const loggerService = {
-    server:{
+  server: {},
+  client: {
+    listByCustomerUserGroup: (
+      custId: string,
+      userId: string,
+      groupId: string,
+      idToken?: string,
+    ) =>
+      apiFetch<LoggerListSelect[]>(
+        `/customers/${custId}/users/${userId}/group/${groupId}/loggers`,
+        {},
+        idToken,
+      ),
+    //apiFetch<LoggerListSelect[]>(`/loggers?groupId=${groupId}`),
 
-    },
-    client:{
-      listByCustomerUserGroup: (custId:string, userId:string,groupId: string,idToken?:string) =>
-        apiFetch<LoggerListSelect[]>(`/customers/${custId}/users/${userId}/group/${groupId}/loggers`,{},idToken),
-        //apiFetch<LoggerListSelect[]>(`/loggers?groupId=${groupId}`),
-    
-      listByCustomerUser: (custId:string, userId:string,groupId: string,idToken?:string) =>
-        apiFetch<LoggerListSelect[]>(`/customers/${custId}/users/${userId}/group/${groupId}/loggers`,{},idToken),
+    listByCustomerUser: (
+      custId: string,
+      userId: string,
+      groupId: string,
+      idToken?: string,
+    ) =>
+      apiFetch<LoggerListSelect[]>(
+        `/customers/${custId}/users/${userId}/group/${groupId}/loggers`,
+        {},
+        idToken,
+      ),
 
-      updateLoggerConfigSettings: (payload: UpdateLoggerConfigSettingsPayload, idToken?:string) =>
-        apiFetch<UpdateLoggerConfigSettingsPayload[]>(`/loggers/config`,{method: "PATCH", body: JSON.stringify(payload),},idToken),
+    updateLoggerConfigSettings: (
+      payload: UpdateLoggerConfigSettingsPayload,
+      idToken?: string,
+    ) =>
+      apiFetch<UpdateLoggerConfigSettingsPayload[]>(
+        `/loggers/config`,
+        { method: "PATCH", body: JSON.stringify(payload) },
+        idToken,
+      ),
 
-      fetchLoggerConfigSettings: (loggerId:string, idToken?:string) =>
-        apiFetch<LoggerConfigSettingsResponse[]>(`/loggers/${loggerId}/config`,{},idToken),
+    fetchLoggerConfigSettings: (loggerId: string, idToken?: string) =>
+      apiFetch<LoggerConfigSettingsResponse[]>(
+        `/loggers/${loggerId}/config`,
+        {},
+        idToken,
+      ),
 
-      updateSensorConfigSettings: (payload: UpdateSensorConfigSettingsPayload, idToken?:string) =>
-        apiFetch<UpdateSensorConfigSettingsPayload[]>(`/loggers/sensor/config`,{method: "PATCH", body: JSON.stringify(payload),},idToken),
+    updateSensorConfigSettings: (
+      payload: UpdateSensorConfigSettingsPayload,
+      idToken?: string,
+    ) =>
+      apiFetch<UpdateSensorConfigSettingsPayload[]>(
+        `/loggers/sensor/config`,
+        { method: "PATCH", body: JSON.stringify(payload) },
+        idToken,
+      ),
 
-      fetchSensorConfigSettings: (loggerId:string, typeId:number, idToken?:string) => 
-        apiFetch<SensorConfigSettingsResponse[]>(`/loggers/${loggerId}/sensor/${typeId}`,{},idToken),
+    fetchSensorConfigSettings: (
+      loggerId: string,
+      typeId: number,
+      idToken?: string,
+    ) =>
+      apiFetch<SensorConfigSettingsResponse[]>(
+        `/loggers/${loggerId}/sensor/${typeId}`,
+        {},
+        idToken,
+      ),
 
-      fetchLoggerCalibrationSettings: (loggerId:string, typeId:number, idToken?:string) => 
-        apiFetch<LoggerCalibrationSettingsResponse>(`/loggers/${loggerId}/calibration/${typeId}`,{},idToken),
+    fetchLoggerCalibrationSettings: (
+      loggerId: string,
+      typeId: number,
+      idToken?: string,
+    ) =>
+      apiFetch<LoggerCalibrationSettingsResponse>(
+        `/loggers/${loggerId}/calibration/${typeId}`,
+        {},
+        idToken,
+      ),
 
-      fetchMptLoggerCalibrationSettings: (loggerId:string, typeId:number, idToken?:string) => 
-        apiFetch<MptCalibrationSettingsResponse>(`/loggers/${loggerId}/calibration/${typeId}`,{},idToken),
+    fetchMptLoggerCalibrationSettings: (
+      loggerId: string,
+      typeId: number,
+      idToken?: string,
+    ) =>
+      apiFetch<MptCalibrationSettingsResponse>(
+        `/loggers/${loggerId}/calibration/${typeId}`,
+        {},
+        idToken,
+      ),
 
-      updateWaterLevelCalibrationSettings: (payload: WaterlevelCalibrationSettings, idToken?:string) =>
-        apiFetch<WaterlevelCalibrationSettings[]>(`/loggers/calibration`,{method: "PATCH", body: JSON.stringify(payload),},idToken),
+    updateWaterLevelCalibrationSettings: (
+      payload: WaterlevelCalibrationSettings,
+      idToken?: string,
+    ) =>
+      apiFetch<WaterlevelCalibrationSettings[]>(
+        `/loggers/calibration`,
+        { method: "PATCH", body: JSON.stringify(payload) },
+        idToken,
+      ),
 
-      updateParCalibrationSettings: (payload: UpdateParCalibrationSettingsPayload, idToken?:string) =>
-        apiFetch<ParCalibrationSettings[]>(`/loggers/calibration`,{method: "PATCH", body: JSON.stringify(payload),},idToken),
-    }   
-}
+    updateParCalibrationSettings: (
+      payload: UpdateParCalibrationSettingsPayload,
+      idToken?: string,
+    ) =>
+      apiFetch<ParCalibrationSettings[]>(
+        `/loggers/calibration`,
+        { method: "PATCH", body: JSON.stringify(payload) },
+        idToken,
+      ),
+
+    updateMptCalibrationSettings: (
+      payload: CalibrationMptPayload,
+      idToken?: string,
+    ) =>
+      apiFetch<CalibrationMptPayload>(
+        `/loggers/calibration`,
+        { method: "PATCH", body: JSON.stringify(payload) },
+        idToken,
+      ),
+  },
+};

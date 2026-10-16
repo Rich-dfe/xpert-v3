@@ -1,3 +1,5 @@
+  import { CalibrationMptSensorTypes } from "@/schemas/calibrationSettingsSchema";
+  
   export interface WaterlevelCalibrationSettings {
   typeId: 4131;
   loggerUid: number | null,
@@ -54,6 +56,8 @@ export type LoggerCalibrationSettingsResponse =
 
 export type MptCalibrationSettingsRow = {
   soil_moisture_units: number | string | null;
+  cal_type: number | string | null;
+  cal_method: number | string | null;
   soil_type_id: number | null;
   dry_limit_line: number | null;
   fc_limit_line: number | null;
@@ -66,3 +70,9 @@ export type MptCalibrationSettingsRow = {
 };
 
 export type MptCalibrationSettingsResponse = MptCalibrationSettingsRow[];
+
+export interface CalibrationMptPayload extends CalibrationMptSensorTypes {
+  typeId: 4161;
+  loggerId: string;
+  loggerUid: number | null;
+}

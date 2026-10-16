@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { loggerService } from "@/service/api/loggerService";
 import { useSession } from "next-auth/react";
-import { LoggerCalibrationSettingsResponse, WaterlevelCalibrationSettings, UpdateParCalibrationSettingsPayload, MptCalibrationSettingsResponse } from "@/types/calibration";
+import { LoggerCalibrationSettingsResponse, WaterlevelCalibrationSettings, UpdateParCalibrationSettingsPayload, MptCalibrationSettingsResponse, CalibrationMptPayload } from "@/types/calibration";
 
 export function useFetchLoggerCalibrationSettings(
   loggerId: string,
@@ -73,6 +73,25 @@ export function useUpdateParLoggerCalibrationSettings(loggerId: string) {
   return useMutation({
     mutationFn: ({ data }: { data: UpdateParCalibrationSettingsPayload }) =>
       loggerService.client.updateParCalibrationSettings(data, idToken),
+   
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries({
+    //     queryKey: ["sensorConfigSettings", loggerId],
+    //   });
+    // },
+  });
+}
+
+
+export function useUpdateMptCalibrationSettings(loggerId: string) {
+  const { data: session } = useSession();
+  const idToken = session?.idToken;
+
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ data }: { data: CalibrationMptPayload }) =>
+      loggerService.client.updateMptCalibrationSettings(data, idToken),
    
     // onSuccess: () => {
     //   queryClient.invalidateQueries({
