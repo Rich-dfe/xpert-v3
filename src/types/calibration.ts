@@ -67,6 +67,7 @@ export type MptCalibrationSettingsRow = {
   sat_soil_volume: number | null;
   slope: number | null;
   offset: number | null;
+  sensor_id: number | null;
 };
 
 export type MptCalibrationSettingsResponse = MptCalibrationSettingsRow[];
@@ -75,4 +76,5 @@ export interface CalibrationMptPayload extends CalibrationMptSensorTypes {
   typeId: 4161;
   loggerId: string;
   loggerUid: number | null;
+  sensorId: number | null;
 }

@@ -245,13 +245,19 @@ export default function CalibrationSettingsMpt() {
   // Event Handlers
   // ---------------------------------------------------------------------------
   function onSubmit(values: CalibrationMptSensorTypes) {
+    if (!calibrationData || calibrationData.length === 0) {
+    toast.error("Cannot save configuration. No sensor data found from API.");
+    return;
+  }
     //console.log("SUBMITTED", values);
+    const sensor_id = calibrationData[0].sensor_id;
 
     const payload: CalibrationMptPayload = {
       ...values,
       typeId: 4161,
       loggerId: selectedLoggerId,
       loggerUid: selectedLoggerUid,
+      sensorId: sensor_id,
     };
 
     console.log("PAYLOAD", payload);
@@ -302,8 +308,8 @@ export default function CalibrationSettingsMpt() {
   // Helper Functions
   // ---------------------------------------------------------------------------
   function calculateCalibrationValues(dryPoint: number, fieldCapacity: number) {
-    const slope = 100 / (dryPoint / 100 - fieldCapacity / 100);
-    const offset = 0 - slope * (dryPoint / 100 / 100);
+    const slope = 100 / ((fieldCapacity / 100 - dryPoint / 100));
+    const offset = 0 - slope * ((dryPoint / 100) / 100);
     return {
       slope: Number(slope.toFixed(4)),
       offset: Number(offset.toFixed(4)),
@@ -510,14 +516,6 @@ export default function CalibrationSettingsMpt() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 border-t pt-4 md:grid-cols-2">
-          {/* <FormSwitch
-            name="calType"
-            label="Calibration Type"
-            checked={calibrationType}
-            onCheckedChange={setCalibrationType}
-            checkedLabel="Volumetric"
-            uncheckedLabel="% of Saturation"
-          /> */}
 
           <Controller
             control={form.control}
@@ -548,15 +546,6 @@ export default function CalibrationSettingsMpt() {
               />
             )}
           />
-
-          {/* <FormSwitch
-            name="calcMethod"
-            label="Calculation Method"
-            checked={calculationMethod}
-            onCheckedChange={setCalculationMethod}
-            checkedLabel="User Defined"
-            uncheckedLabel="Calculated"
-          /> */}
         </div>
       </section>
 
@@ -634,7 +623,7 @@ export default function CalibrationSettingsMpt() {
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <FormNumberField
                 name={`sensors.${sensorIndex}.saturatedSoilWeight`}
-                label="Saturated Soil Weight"
+                label="Saturated Soil Weight (g)"
                 control={form.control}
                 placeholder="Enter value"
                 disabled={formState.soilFieldDisabled}
@@ -642,7 +631,7 @@ export default function CalibrationSettingsMpt() {
 
               <FormNumberField
                 name={`sensors.${sensorIndex}.drySoilWeight`}
-                label="Dry Soil Weight"
+                label="Dry Soil Weight (g)"
                 control={form.control}
                 placeholder="Enter value"
                 disabled={formState.soilFieldDisabled}

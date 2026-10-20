@@ -37,14 +37,14 @@ export const calibrationSettingsParSchema = z.object({
 //Defines one MPT sensor characteristics
 export const calibrationSettingsMptSenorSchema = z.object({
   soilType:z.string(),
-  dryPoint:z.number(),
-  fieldCapacity:z.number(),
-  wiltPoint:z.number(),
-  saturatedSoilWeight:z.number(),
-  drySoilWeight:z.number(),
-  saturatedVolume:z.number(),
-  slope:z.number(),
-  offset:z.number(),
+  dryPoint:z.number().min(1).max(10000),
+  fieldCapacity:z.number().min(1).max(10000),
+  wiltPoint:z.number().min(1).max(100),
+  saturatedSoilWeight:z.number().min(1).max(5000),
+  drySoilWeight:z.number().min(1).max(5000),
+  saturatedVolume:z.number().min(1).max(2000),
+  slope:z.number().min(-100).max(100),
+  offset:z.number().min(-100).max(100),
 });
 
 //Defines an array of sensor characteristics that can have a variable length ie. 3 sensors or 5 sensors
