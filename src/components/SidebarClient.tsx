@@ -121,7 +121,10 @@ const SidebarClient = ({ user, customers }: SidebarClientProps) => {
     setSelectedLoggerId,
     selectedLoggerUid,
     setSelectedLoggerUid,
-    setLoggerTypeId
+    setLoggerTypeId,
+    setLatitude,
+    setLongitude,
+    setSelectedLoggerName,
   } = useApplicationContext();
 
   const effectiveCustomerId = isSuperOrAdmin(user)
@@ -225,14 +228,17 @@ const SidebarClient = ({ user, customers }: SidebarClientProps) => {
   //This handler because it could be declared before 'loggers' variable was declared (just above).
   const handleLoggerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const loggerId = e.target.value;
-
+    //console.log('LOGGERS', loggers);
     const selectedLogger = loggers?.find(
       (logger) => logger.id.toString() === loggerId,
     );
-
+    console.log('SELECTED LOGGER', selectedLogger);
     setSelectedLoggerId(e.target.value);
     setSelectedLoggerUid(selectedLogger?.loggerUid ?? null);
     setLoggerTypeId(selectedLogger?.typeId!);
+    setLatitude(selectedLogger?.lat ?? null);
+    setLongitude(selectedLogger?.lng ?? null);
+    setSelectedLoggerName(selectedLogger?.loggerName ?? null);
   };
 
   // Determine the unified loading state based on which query is active

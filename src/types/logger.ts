@@ -6,6 +6,9 @@ export interface LoggerListSelect {
     productId: number;
     loggerUid: number | null;
     typeId:number;
+    lat:number | null;
+    lng: number | null;
+    name: string | null;
 }
 
 export type UpdateLoggerConfigSettingsPayload =
@@ -37,4 +40,18 @@ export type UpdateLoggerConfigSettingsPayload =
     typeId: number | null,
     loggerUid: number | null,
     loggerId:string
-  } 
+  }
+  
+  export type LatestDiagnosticData = {
+  data1: number,
+  data2: number,
+  type: number
+}
+
+export type LatestLoggerInfoResponse = {
+  loggerUid: string,
+  logDateTime: number,
+  createdAt: number,
+  ttlDate: number,
+  diagnostics: LatestDiagnosticData[],
+}

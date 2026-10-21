@@ -1,6 +1,7 @@
 import { auth, signIn } from "@/auth";
-import LoggerConfigSettingsForm from "@/components/built-forms/LoggerConfigForm";
 import { FormCard } from "@/components/forms/FormCard";
+import LoggerMapLoader from "@/components/LoggerMapLoader";
+import LatestLoggerInfo from "@/components/LatestLoggerInfo";
 
 export default async function Home() {
 
@@ -11,9 +12,9 @@ export default async function Home() {
         title="Map"
         description="Configure the main logger settings."
       >
-      <div>Xpert</div>
+      <LoggerMapLoader />
       </FormCard>
-
+      
       <FormCard
         title="ID Token"
         description="The JWT ID Token."
@@ -31,7 +32,12 @@ export default async function Home() {
         </form>
       )}
       </FormCard>
-      
+      <FormCard 
+        title="Latest Diganostics"
+        description="The latest."
+        >
+          <LatestLoggerInfo />
+      </FormCard>
     </div>
   );
 }

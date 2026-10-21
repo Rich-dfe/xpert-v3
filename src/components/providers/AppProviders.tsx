@@ -4,6 +4,7 @@ import { ThemeProvider } from "./ThemeProvider";
 import { ApplicationContextProvider } from "@/context/ApplicationContext";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
+import "leaflet/dist/leaflet.css";
 
 export function AppProviders({
   children,
