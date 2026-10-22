@@ -33,8 +33,7 @@ export default async function Home() {
       )}
       </FormCard>
       <FormCard 
-        title="Latest Diganostics"
-        description="The latest."
+        title="Latest Logger Information"
         >
           <LatestLoggerInfo />
       </FormCard>

@@ -141,7 +141,7 @@ export const loggerService = {
       idToken?: string,
     ) =>
       apiFetch<LatestLoggerInfoResponse>(
-        `/loggers/diagnostic.${loggerUid}/latest/`,
+        `/loggers/diagnostic/${loggerUid}/latest/`,
         {},
         idToken,
       ),
