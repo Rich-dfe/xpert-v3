@@ -7,7 +7,8 @@ import {
   LoggerConfigSettingsResponse,
   UpdateSensorConfigSettingsPayload,
   SensorConfigSettingsResponse,
-  LatestLoggerInfoResponse,
+  LatestDiagnosticDataResponse,
+  GeneralLoggerInfoResponse,
 } from "@/types/logger";
 import {
   LoggerCalibrationSettingsResponse,
@@ -140,8 +141,18 @@ export const loggerService = {
       loggerUid: number | null,
       idToken?: string,
     ) =>
-      apiFetch<LatestLoggerInfoResponse>(
+      apiFetch<LatestDiagnosticDataResponse>(
         `/loggers/diagnostic/${loggerUid}/latest/`,
+        {},
+        idToken,
+      ),
+
+      fetchLoggerGeneralInfo: (
+      loggerId: string | null,
+      idToken?: string,
+    ) =>
+      apiFetch<GeneralLoggerInfoResponse[]>(
+        `/loggers/${loggerId}/info/`,
         {},
         idToken,
       ),

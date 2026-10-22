@@ -48,10 +48,21 @@ export type UpdateLoggerConfigSettingsPayload =
   type: number
 }
 
-export type LatestLoggerInfoResponse = {
+export type LatestDiagnosticDataResponse = {
   loggerUid: string,
   logDateTime: number,
   createdAt: number,
   ttlDate: number,
   diagnostics: LatestDiagnosticData[],
+}
+
+export type GeneralLoggerInfoResponse = {
+  loggerName: string,
+  type: string,
+  model: string,
+  serialNumber: string,
+  serverSettingsVersion: number,
+  loggerSettingsVersion: number,
+  firmwareVersionInUse: number,
+  productName: string,
 }

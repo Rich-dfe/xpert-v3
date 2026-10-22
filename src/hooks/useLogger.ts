@@ -9,7 +9,8 @@ import {
   LoggerConfigSettingsResponse,
   SensorConfigSettingsResponse,
   UpdateSensorConfigSettingsPayload,
-  LatestLoggerInfoResponse,
+  LatestDiagnosticDataResponse,
+  GeneralLoggerInfoResponse,
 } from "@/types/logger";
 import { LoggerCalibrationSettingsResponse } from "@/types/calibration";
 import { LoggerConfigSettingValues } from "@/schemas/loggerConfigSettings";
@@ -125,17 +126,31 @@ export function useUpdateSensorConfigSettings(loggerId: string) {
   });
 }
 
-export function useFetchLatestLoggerInfo(loggerUid: number | null) {
+export function useFetchLatestDiagnosticData(loggerUid: number | null) {
   const { data: session } = useSession();
   const idToken = session?.idToken;
 
-  return useQuery<LatestLoggerInfoResponse, Error>({
+  return useQuery<LatestDiagnosticDataResponse, Error>({
     queryKey: ["latestInfo", loggerUid],
 
     queryFn: () =>
       loggerService.client.fetchLatestDiagnosticSettings(loggerUid, idToken),
 
     enabled: !!loggerUid,
+  });
+}
+
+export function useFetchGeneralLoggerInfo(loggerId: string | null) {
+  const { data: session } = useSession();
+  const idToken = session?.idToken;
+
+  return useQuery<GeneralLoggerInfoResponse[], Error>({
+    queryKey: ["latestInfo", loggerId],
+
+    queryFn: () =>
+      loggerService.client.fetchLoggerGeneralInfo(loggerId, idToken),
+
+    enabled: !!loggerId,
   });
 }
 

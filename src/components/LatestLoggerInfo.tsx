@@ -1,7 +1,7 @@
 "use client";
 
 import { useApplicationContext } from "@/context/ApplicationContext";
-import { useFetchLatestLoggerInfo } from "@/hooks/useLogger";
+import { useFetchLatestDiagnosticData, useFetchGeneralLoggerInfo } from "@/hooks/useLogger";
 import {
   Settings,
   BatteryIcon,
@@ -15,19 +15,25 @@ export default function LatestLoggerInfo() {
   //////////////////////////////////////////////////////////////////////////////
   // Context
   //////////////////////////////////////////////////////////////////////////////
-  const { selectedLoggerUid } = useApplicationContext();
+  const { selectedLoggerUid, selectedLoggerId } = useApplicationContext();
 
   const {
-    data: latestInfoData,
+    data: latestDiagnosticData,
     isLoading: isFetchLoading,
     isError: isFetchError,
     error: fetchError,
-  } = useFetchLatestLoggerInfo(selectedLoggerUid);
+  } = useFetchLatestDiagnosticData(selectedLoggerUid);
 
-  console.log("LATEST INFO", latestInfoData);
-  console.log("LATEST INFO ERROR", fetchError);
+const {
+    data: generalInfoData,
+    isLoading: isFetchInfoLoading,
+    isError: isFetchInfoError,
+    error: fetchInfoError,
+  } = useFetchGeneralLoggerInfo(selectedLoggerId);
 
-  const latestInfoDate = latestInfoData?.createdAt;
+  console.log("LATEST INFO", generalInfoData);
+
+  const latestInfoDate = latestDiagnosticData?.createdAt;
   const printDate = latestInfoDate
     ? new Date(latestInfoDate).toLocaleString("en-NZ", {
         day: "2-digit",
@@ -41,7 +47,7 @@ export default function LatestLoggerInfo() {
   ///////////////////////////////////////////////
   //BATTERY STATUS CALCULATIONS
   //////////////////////////////////////////////
-  const batteryStatus = latestInfoData?.diagnostics?.find(
+  const batteryStatus = latestDiagnosticData?.diagnostics?.find(
     (item) => item.type === 4099,
   );
   const batteryVoltage = batteryStatus?.data1;
@@ -60,12 +66,12 @@ const batteryPercentage =
 
   /////////////////////////////////////////////////////
 
-  const restarts = latestInfoData?.diagnostics?.find(
+  const restarts = latestDiagnosticData?.diagnostics?.find(
     (item) => item.type === 4101,
   );
   const restartData1 = restarts?.data1;
 
-  const rssi = latestInfoData?.diagnostics?.find((item) => item.type === 4100);
+  const rssi = latestDiagnosticData?.diagnostics?.find((item) => item.type === 4100);
   const rssiData1 = rssi?.data1;
   const rssiData2 = rssi?.data2;
   const rssiCalculated = rssiData1
@@ -134,23 +140,39 @@ const batteryPercentage =
 
         {/* Calibration Information */}
         <section className="rounded-lg border bg-card p-4 space-y-4">
-          <h3 className="text-sm font-semibold">Calibration Information</h3>
+          <h3 className="text-sm font-semibold">General Information</h3>
 
           <ul className="space-y-3 text-sm">
             <li className="flex items-center justify-between gap-4">
               <span className="flex items-center gap-2 text-muted-foreground">
                 <Settings className="h-4 w-4 shrink-0" />
-                Last Reading
+                Name
               </span>
-              <span className="font-medium">22 Oct 2026</span>
+              <span className="font-medium">{generalInfoData ? generalInfoData[0].loggerName : ""}</span>
             </li>
 
             <li className="flex items-center justify-between gap-4">
               <span className="flex items-center gap-2 text-muted-foreground">
                 <Settings className="h-4 w-4 shrink-0" />
-                Calibration
+                Product
               </span>
-              <span className="font-medium">Enabled</span>
+              <span className="font-medium">{generalInfoData ? generalInfoData[0].productName : ""}</span>
+            </li>
+
+            <li className="flex items-center justify-between gap-4">
+              <span className="flex items-center gap-2 text-muted-foreground">
+                <Settings className="h-4 w-4 shrink-0" />
+                Model
+              </span>
+              <span className="font-medium">{generalInfoData ? generalInfoData[0].model : ""}</span>
+            </li>
+
+            <li className="flex items-center justify-between gap-4">
+              <span className="flex items-center gap-2 text-muted-foreground">
+                <Settings className="h-4 w-4 shrink-0" />
+                Firmware Version
+              </span>
+              <span className="font-medium">{generalInfoData ? generalInfoData[0].firmwareVersionInUse /100 : ""}</span>
             </li>
           </ul>
         </section>
