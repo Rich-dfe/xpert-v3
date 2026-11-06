@@ -156,7 +156,7 @@ const batteryPercentage =
                 <Settings className="h-4 w-4 shrink-0" />
                 Product
               </span>
-              <span className="font-medium">{generalInfoData ? generalInfoData[0].productName : ""}</span>
+              <span className="font-medium truncate">{generalInfoData ? generalInfoData[0].productName : ""}</span>
             </li>
 
             <li className="flex items-center justify-between gap-4">

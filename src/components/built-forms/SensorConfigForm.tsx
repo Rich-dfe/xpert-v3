@@ -71,7 +71,7 @@ export default function SensorConfigSettingsForm() {
       ...values,
       typeId: loggerTypeId,
       loggerUid: selectedLoggerUid,
-      loggerId:selectedLoggerId
+      loggerId: selectedLoggerId,
     };
     // Send payload to the API here
     mutate(
@@ -94,31 +94,88 @@ export default function SensorConfigSettingsForm() {
       onSubmit={sensorForm.handleSubmit(onSubmit, (errors) => {
         console.log("Validation errors:", errors);
       })}
-      className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start"
+      className="mx-auto w-full max-w-6xl space-y-4 pb-4"
     >
-      {selectedLoggerId} - {selectedLoggerUid} - {loggerTypeId}
-      <pre>{JSON.stringify(fetchSensorData, null, 2)}</pre>
-      <div className="w-64">
-      <FormSelect
-        name="sensorSetting"
-        label={sensorConfig.label}
-        value={sensorForm.watch("sensorSetting")}
-        onValueChange={(value) => sensorForm.setValue("sensorSetting", value)}
-        placeholder="Please Select"
-        options={sensorConfig.options}
-      />
+      {/* Header and Logger Information */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-semibold tracking-tight">
+          Sensor Configuration
+        </h2>
+
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span>
+            Logger ID:{" "}
+            <strong className="font-medium text-foreground">
+              {selectedLoggerId}
+            </strong>
+          </span>
+
+          <span>
+            UID:{" "}
+            <strong className="font-medium text-foreground">
+              {selectedLoggerUid}
+            </strong>
+          </span>
+
+          <span>
+            Type:{" "}
+            <strong className="font-medium text-foreground">
+              {loggerTypeId}
+            </strong>
+          </span>
+        </div>
       </div>
-      <div></div>
-      <Button type="submit" disabled={isUpdatePending} className="mb-5">
-        {isUpdatePending ? (
-          <>
-            <Spinner data-icon="inline-start" />
-            Saving...
-          </>
-        ) : (
-          "Save"
-        )}
-      </Button>
+
+      {/* Sensor Settings */}
+      <section className="rounded-lg border bg-card p-4 space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold">Sensor Settings</h3>
+
+          <p className="mt-1 text-xs text-muted-foreground">
+            Configure the sensor setting for this logger.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+          <FormSelect
+            name="sensorSetting"
+            label={sensorConfig.label}
+            value={sensorForm.watch("sensorSetting")}
+            onValueChange={(value) =>
+              sensorForm.setValue("sensorSetting", value)
+            }
+            placeholder="Please Select"
+            options={sensorConfig.options}
+          />
+        </div>
+      </section>
+
+      {/* Debug Information - Remove when no longer needed
+      <section className="rounded-lg border bg-card p-4 space-y-4">
+        <h3 className="text-sm font-semibold">Debug Information</h3>
+
+        <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs">
+          {JSON.stringify(fetchSensorData, null, 2)}
+        </pre>
+      </section> */}
+
+      {/* Save */}
+      <div className="flex justify-end border-t pt-4">
+        <Button
+          type="submit"
+          disabled={isUpdatePending}
+          className="w-full sm:w-auto"
+        >
+          {isUpdatePending ? (
+            <>
+              <Spinner data-icon="inline-start" />
+              Saving...
+            </>
+          ) : (
+            "Save"
+          )}
+        </Button>
+      </div>
     </form>
   );
 }
