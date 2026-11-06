@@ -12,12 +12,12 @@ export interface LoggerReading {
   s3: number | null;
   s4: number | null;
   s5: number | null;
-  st1: number | null;
-  st2: number | null;
-  st3: number | null;
-  st4: number | null;
-  st5: number | null;
-  st11: number | null;
+  s1t: number | null;
+  s2t: number | null;
+  s3t: number | null;
+  s4t: number | null;
+  s5t: number | null;
+  s11t: number | null;
 }
 
 export interface LoggerMeasurement {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useApplicationContext } from "@/context/ApplicationContext";
 import ChartForm from "@/components/built-forms/ChartForm";
-import ChartContainer from "@/components/ChartContainer";
+import ChartContainer, {sensors} from "@/components/ChartContainer";
 import { useFetchPrimaryChartData } from "@/hooks/useData";
 import { ChartFormValues } from "@/schemas/chartFormSchema";
 import { LoggerChartResponse } from "@/types/chart";
@@ -33,6 +33,23 @@ const {
     dateRange?.end
   )
 
+  const availableSensors = chartData?.readings?.length
+  ? chartData.readings[0].type === 4131
+    ? [sensors[0]]
+    : sensors.filter((sensor) =>
+        chartData.readings.some((reading) => {
+          const channel1Value =
+            reading[sensor.channel1 as keyof typeof reading];
+
+          const channel2Value = sensor.channel2
+            ? reading[sensor.channel2 as keyof typeof reading]
+            : null;
+
+          return channel1Value != null || channel2Value != null;
+        })
+      )
+  : [];
+
   function handleFormSubmit(values: ChartFormValues) {
     if (!values.startDate || !values.stopDate) {
     return;
@@ -54,7 +71,20 @@ const {
     <div>
       <h1>Charts {selectedLoggerId}</h1>
       <ChartForm onSubmit={handleFormSubmit}/>
-      <ChartContainer data={chartData} sensorId={1}/>
+      <div className="space-y-6">
+  {availableSensors.map((sensor) => (
+    <div key={sensor.id}>
+      <h2 className="mb-2 text-lg font-semibold">
+        Sensor {sensor.id}
+      </h2>
+
+      <ChartContainer
+        data={chartData}
+        sensorId={sensor.id}
+      />
+    </div>
+  ))}
+</div>
     </div>
   );
 }
