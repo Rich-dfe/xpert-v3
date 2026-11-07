@@ -2,6 +2,7 @@
 
 import ReactECharts from "echarts-for-react";
 import { LoggerChartResponse } from "@/types/chart";
+import { exportCSV } from "@/lib/exportCsv";
 
 interface LoggerChartProps {
   data?: LoggerChartResponse;
@@ -17,7 +18,7 @@ export const sensors = [
   { id: 6, channel1: "s11t", channel2: null },
 ];
 
-const STANDARD_LOGGER_TYPE = 4131;
+const STANDARD_LOGGER_TYPES = [4131];
 
 function hasSensorReadings(
   readings: LoggerChartResponse["readings"],
@@ -35,7 +36,10 @@ function hasSensorReadings(
 }
 
 export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
-  const isStandardLogger = data?.readings?.[0]?.type === STANDARD_LOGGER_TYPE;
+  const loggerType = data?.readings?.[0]?.type;
+
+  const isStandardLogger =
+    loggerType !== undefined && STANDARD_LOGGER_TYPES.includes(loggerType);
 
   const sensor = sensors.find((s) => s.id === sensorId);
 
@@ -55,6 +59,9 @@ export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
     );
   }
 
+  //Get the number of data points
+  const dataPointCount = data?.readings?.length ?? 0;
+
   // Get measurement information for the selected sensor.
   const primaryMeasurement = data.measurements.find(
     (measurement) => measurement.field === channel1,
@@ -64,6 +71,51 @@ export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
     ? data.measurements.find((measurement) => measurement.field === channel2)
     : undefined;
 
+  ///////////////////////////////////////////////
+  // CSV Download Code
+  //////////////////////////////////////////////
+  function handleDownloadCSV() {
+    if (!data?.readings?.length || !channel1) return;
+
+    const headers = [
+      "Date / Time",
+      primaryMeasurement?.name ?? "Channel 1",
+      ...(channel2 ? [secondaryMeasurement?.name ?? "Channel 2"] : []),
+    ];
+
+    const rows = data.readings.map((reading) => {
+      const primaryValue = reading[channel1 as keyof typeof reading];
+
+      const secondaryValue = channel2
+        ? reading[channel2 as keyof typeof reading]
+        : undefined;
+
+      return [
+        new Date(reading.logDateTime * 1000).toISOString(),
+        primaryValue == null ? "" : String(primaryValue),
+        ...(channel2
+          ? [secondaryValue == null ? "" : String(secondaryValue)]
+          : []),
+      ];
+    });
+
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/:/g, "-")
+      .replace(/\.\d{3}Z$/, "");
+
+      const loggerUidHex = Number(data.readings[0].loggerUid).toString(16);
+
+    exportCSV({
+      filename: `logger-${loggerUidHex}-${timestamp}.csv`,
+      headers,
+      rows,
+    });
+  }
+  ///////////////////////////////////////////////
+  // CSV Download Code
+  //////////////////////////////////////////////
+
   // Create the primary chart series.
   const series = [
     {
@@ -71,6 +123,8 @@ export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
       type: "line",
       yAxisIndex: 0,
       showSymbol: false,
+      sampling: "lttb",
+      smooth: false,
       data: data.readings.map((reading) => [
         reading.logDateTime * 1000,
         reading[channel1 as keyof typeof reading],
@@ -84,6 +138,8 @@ export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
       type: "line",
       yAxisIndex: 1,
       showSymbol: false,
+      sampling: "lttb",
+      smooth: false,
       data: data.readings.map((reading) => [
         reading.logDateTime * 1000,
         reading[channel2 as keyof typeof reading],
@@ -114,6 +170,7 @@ export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
       },
     },
 
+    animation: false,
     toolbox: {
       show: true,
       right: 20,
@@ -209,6 +266,18 @@ export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
 
   return (
     <div className="w-full rounded-lg border bg-white p-4">
+      <div className="text-sm text-gray-600">
+        Data points: <strong>{dataPointCount.toLocaleString()}</strong>
+      </div>
+      <div className="mb-4 flex justify-end">
+        <button
+          onClick={handleDownloadCSV}
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+        >
+          Download CSV
+        </button>
+      </div>
+
       <ReactECharts
         option={option}
         style={{
