@@ -9,6 +9,41 @@ import { ChartFormValues } from "@/schemas/chartFormSchema";
 import { LoggerChartResponse } from "@/types/chart";
 import { Spinner } from "@/components/ui/spinner";
 
+const loggerColors: Record<
+  number,
+  { channel1: string; channel2?: string }
+> = {
+  4131: {
+    channel1: "#25a2eb",
+    channel2: "#dc5d26",
+  },
+  4132: {
+    channel1: "#ead308",
+    channel2: "#dc5d26",
+  },
+  4137: {
+    channel1: "#ead308",
+    channel2: "#dc5d26",
+  },
+  4161: {
+    channel1: "#07ad28",
+    channel2: "#dc5d26",
+  },
+  4181: {
+    channel1: "#dc9d26",
+    channel2: "#dc5d26",
+  },
+  4294: {
+    channel1: "#dc9d26",
+    channel2: "#dc5d26",
+  }
+};
+
+const defaultColors = {
+  channel1: "#2563eb",
+  channel2: "#dc2626",
+};
+
 export default function ChartsPage() {
   const { selectedLoggerId, selectedLoggerUid, loggerTypeId } =
     useApplicationContext();
@@ -34,8 +69,11 @@ export default function ChartsPage() {
     dateRange?.end,
   );
 
+  const currentLoggerType = chartData?.readings?.[0]?.type;
+  const colors = loggerColors[currentLoggerType ?? 0] ?? defaultColors;
+
   const availableSensors = chartData?.readings?.length
-    ? [4131].includes(chartData.readings[0].type)
+    ? [4131,4132,4137,4161,4181,4294].includes(chartData.readings[0].type)
       ? [sensors[0]]
       : sensors.filter((sensor) =>
           chartData.readings.some((reading) => {
@@ -82,7 +120,7 @@ export default function ChartsPage() {
             
             <h2 className="mb-2 text-lg font-semibold">Sensor {sensor.id}</h2>
 
-            <ChartContainer data={chartData} sensorId={sensor.id} />
+            <ChartContainer data={chartData} sensorId={sensor.id} colors={colors} />
           </div>
         ))}
       </div>

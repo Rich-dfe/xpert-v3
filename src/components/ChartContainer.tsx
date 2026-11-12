@@ -7,6 +7,10 @@ import { exportCSV } from "@/lib/exportCsv";
 interface LoggerChartProps {
   data?: LoggerChartResponse;
   sensorId: number;
+  colors?: {
+    channel1: string;
+    channel2?: string;
+  };
 }
 
 export const sensors = [
@@ -18,7 +22,7 @@ export const sensors = [
   { id: 6, channel1: "s11t", channel2: null },
 ];
 
-const STANDARD_LOGGER_TYPES = [4131];
+const STANDARD_LOGGER_TYPES = [4131,4132,4137,4161,4181,4294];
 
 function hasSensorReadings(
   readings: LoggerChartResponse["readings"],
@@ -35,7 +39,10 @@ function hasSensorReadings(
   });
 }
 
-export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
+export default function LoggerChart({ data, sensorId,colors = {
+    channel1: "#2563eb",
+    channel2: "#dc2626",
+  }, }: LoggerChartProps) {
   const loggerType = data?.readings?.[0]?.type;
 
   const isStandardLogger =
@@ -121,6 +128,7 @@ export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
     {
       name: primaryMeasurement?.name ?? `Sensor ${sensorId} Channel 1`,
       type: "line",
+      color: colors.channel1,
       yAxisIndex: 0,
       showSymbol: false,
       sampling: "lttb",
@@ -136,6 +144,7 @@ export default function LoggerChart({ data, sensorId }: LoggerChartProps) {
     series.push({
       name: secondaryMeasurement?.name ?? `Sensor ${sensorId} Channel 2`,
       type: "line",
+      color: colors.channel2 ?? "#dc2626",
       yAxisIndex: 1,
       showSymbol: false,
       sampling: "lttb",
