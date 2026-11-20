@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useApplicationContext } from "@/context/ApplicationContext";
 import ChartForm from "@/components/built-forms/ChartForm";
 import ChartContainer, { sensors } from "@/components/ChartContainer";
+import ChartContainerRainGauge from "@/components/ChartContainerRainGauge";
+import ChartContainerWiper from "@/components/ChartContainerWiper";
 import { useFetchPrimaryChartData } from "@/hooks/useData";
 import { ChartFormValues } from "@/schemas/chartFormSchema";
 import { LoggerChartResponse } from "@/types/chart";
@@ -70,7 +72,23 @@ export default function ChartsPage() {
   );
 
   const currentLoggerType = chartData?.readings?.[0]?.type;
+  console.log('CURRENT TYPE', currentLoggerType);
+  console.log('SELECTED TYPE', loggerTypeId);
   const colors = loggerColors[currentLoggerType ?? 0] ?? defaultColors;
+
+  //Determine which chart to use based on the logger type.
+  const chartComponents = {
+  4131: ChartContainer,
+  4132: ChartContainer,
+  4137: ChartContainerRainGauge,
+  4161: ChartContainer,
+  4181: ChartContainer,
+  4294: ChartContainerWiper,
+};
+
+const ActiveChartContainer =
+  chartComponents[currentLoggerType as keyof typeof chartComponents] ??
+  ChartContainer;
 
   const availableSensors = chartData?.readings?.length
     ? [4131,4132,4137,4161,4181,4294].includes(chartData.readings[0].type)
@@ -120,7 +138,7 @@ export default function ChartsPage() {
             
             <h2 className="mb-2 text-lg font-semibold">Sensor {sensor.id}</h2>
 
-            <ChartContainer data={chartData} sensorId={sensor.id} colors={colors} />
+            <ActiveChartContainer data={chartData} sensorId={sensor.id} colors={colors} />
           </div>
         ))}
       </div>

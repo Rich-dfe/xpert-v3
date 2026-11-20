@@ -3,6 +3,7 @@
 import ReactECharts from "echarts-for-react";
 import { LoggerChartResponse } from "@/types/chart";
 import { exportCSV } from "@/lib/exportCsv";
+import { useApplicationContext } from "@/context/ApplicationContext";
 
 interface LoggerChartProps {
   data?: LoggerChartResponse;
@@ -44,6 +45,11 @@ export default function LoggerChart({ data, sensorId,colors = {
     channel2: "#dc2626",
   }, }: LoggerChartProps) {
   const loggerType = data?.readings?.[0]?.type;
+
+  const {
+    selectedLoggerUidHex,
+    selectedLoggerName
+  } = useApplicationContext();
 
   const isStandardLogger =
     loggerType !== undefined && STANDARD_LOGGER_TYPES.includes(loggerType);
@@ -111,10 +117,10 @@ export default function LoggerChart({ data, sensorId,colors = {
       .replace(/:/g, "-")
       .replace(/\.\d{3}Z$/, "");
 
-      const loggerUidHex = Number(data.readings[0].loggerUid).toString(16);
+      //const loggerUidHex = Number(data.readings[0].loggerUid).toString(16);
 
     exportCSV({
-      filename: `logger-${loggerUidHex}-${timestamp}.csv`,
+      filename: `logger-${selectedLoggerUidHex}-${timestamp}.csv`,
       headers,
       rows,
     });
@@ -132,11 +138,55 @@ export default function LoggerChart({ data, sensorId,colors = {
       yAxisIndex: 0,
       showSymbol: false,
       sampling: "lttb",
+      progressive: 5000,
+      progressiveThreshold: 10000,
       smooth: false,
       data: data.readings.map((reading) => [
         reading.logDateTime * 1000,
         reading[channel1 as keyof typeof reading],
       ]),
+
+      // Add PAR threshold lines when available
+    
+...(data.thresholdValues && {
+  markLine: {
+    silent: true,
+    symbol: ["none", "none"],
+    animation: false,
+    data: [
+      {
+        name: "Saturation",
+        yAxis: data.thresholdValues[0],
+        lineStyle: {
+          color: "#dc2626",
+          type: "solid",
+          width: 2,
+        },
+        label: {
+          show: true,
+          formatter: "Saturation",
+          position: "insideEndTop",
+        },
+      },
+      {
+        name: "Pre-saturation",
+        yAxis: data.thresholdValues[1],
+        lineStyle: {
+          color: "#f59e0b",
+          type: "dashed",
+          width: 2,
+        },
+        label: {
+          show: true,
+          formatter: "Pre-saturation",
+          position: "insideEndTop",
+        },
+      },
+    ],
+  },
+}),
+
+
     },
   ];
 
@@ -148,6 +198,8 @@ export default function LoggerChart({ data, sensorId,colors = {
       yAxisIndex: 1,
       showSymbol: false,
       sampling: "lttb",
+      progressive: 5000,
+      progressiveThreshold: 10000,
       smooth: false,
       data: data.readings.map((reading) => [
         reading.logDateTime * 1000,
@@ -157,6 +209,16 @@ export default function LoggerChart({ data, sensorId,colors = {
   }
 
   const option = {
+    title: {
+    text: selectedLoggerName,
+    left: "center",
+    top: 30,
+    textStyle: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: "#333",
+    },
+  },
     tooltip: {
       trigger: "axis",
       formatter: (params: any) => {

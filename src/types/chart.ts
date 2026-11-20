@@ -27,8 +27,18 @@ export interface LoggerMeasurement {
   defaultUnit: string;
 }
 
+export interface ChartDataMetadata {
+  downsampled: boolean;
+  algorithm: string;
+  originalPoints: number;
+  resultingPoints: number;
+  reductionPercentage: number;
+};
+
 export interface LoggerChartResponse {
   success: boolean;
   readings: LoggerReading[];
   measurements: LoggerMeasurement[];
+  metadata: ChartDataMetadata;
+  thresholdValues?: [number, number] | null;
 }
